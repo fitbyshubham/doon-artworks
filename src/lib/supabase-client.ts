@@ -1,11 +1,15 @@
 // src/lib/supabase-client.ts
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+// NOTE: This file must use the @supabase/ssr package for Next.js compatibility.
+import { createBrowserClient } from "@supabase/ssr";
 
-// ✅ Use a different name: e.g., `createSupabaseBrowserClient`
+// This function creates a client configured to manage cookies correctly
+// for the Next.js App Router, ensuring session persistence.
 const createSupabaseBrowserClient = () =>
-  createSupabaseClient(
+  createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    // The `createBrowserClient` helper automatically manages cookies
+    // and session storage, resolving your persistence issue.
   );
 
 export { createSupabaseBrowserClient };

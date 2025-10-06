@@ -3,18 +3,27 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { artworks as artworkData } from "@/data/artworks.json"; // ✅ Real data
 
+// 🔸 Updated interface to match your JSON
 interface Artwork {
-  id: number;
+  id: string; // e.g., "01", "29"
+  lotNumber: string;
   title: string;
   artist: string;
-  currentBid: number;
+  medium: string;
+  dimensions: {
+    height: string;
+    width: string;
+    formatted: string;
+  };
+  startingBid: number;
+  minimumIncrement: number;
+  page: number;
   image: string;
-  description: string;
-  category: string;
 }
 
-// Custom styles object for the social media icons to use the actual icons
+// Custom styles object for the social media icons
 const socialIcons = {
   f: (
     <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
@@ -35,98 +44,36 @@ const socialIcons = {
     <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
     </svg>
-  ), // Placeholder for general icon
+  ),
 };
 
 export default function HomePage() {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null); // 🔸 string
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // For mobile menu
   const router = useRouter();
 
   useEffect(() => {
-    // Generate 29 mock artworks across different categories
-    const categories = [
-      "Abstract",
-      "Modern",
-      "Nature",
-      "Digital",
-      "Classical",
-      "Surreal",
-      "Minimalist",
-      "Pop Art",
-      "Impressionist",
-    ];
-    const artists = [
-      "Alex Rivera",
-      "Maya Chen",
-      "Elena Petrova",
-      "Jordan Lee",
-      "Sophia Kim",
-      "Marcus Johnson",
-      "Aisha Patel",
-      "Thomas Wright",
-      "Luna Garcia",
-      "Hiroshi Tanaka",
-    ];
-    const titles = [
-      "Abstract Expression",
-      "Urban Landscape",
-      "Nature's Whisper",
-      "Digital Dreams",
-      "Classical Harmony",
-      "Surreal Journey",
-      "Minimalist Vision",
-      "Pop Culture",
-      "Impressionist Light",
-      "Cosmic Flow",
-      "Ocean Depths",
-      "Mountain Majesty",
-      "Desert Dreams",
-      "Forest Whispers",
-      "City Lights",
-      "Starry Night",
-      "Golden Hour",
-      "Winter Solstice",
-      "Spring Awakening",
-      "Summer Heat",
-      "Autumn Colors",
-      "Eternal Flame",
-      "Silent Echo",
-      "Vibrant Chaos",
-      "Peaceful Mind",
-      "Dynamic Energy",
-      "Serene Waters",
-      "Mystical Forest",
-      "Celestial Bodies",
-    ];
-
-    const mockArtworks: Artwork[] = Array.from({ length: 29 }, (_, i) => ({
-      id: i + 1,
-      title: titles[i] || `Artwork ${i + 1}`,
-      artist: artists[Math.floor(Math.random() * artists.length)],
-      currentBid: Math.floor(Math.random() * 5000) + 500,
-      image: `/images/artwork${(i % 4) + 1}.jpg`,
-      description: `A captivating piece that explores the boundaries of ${categories[
-        Math.floor(Math.random() * categories.length)
-      ].toLowerCase()} art.`,
-      category: categories[Math.floor(Math.random() * categories.length)],
-    }));
-
-    setArtworks(mockArtworks);
-    setTimeout(() => setLoading(false), 800);
+    // ✅ Use real data
+    setArtworks(artworkData);
+    const timer = setTimeout(() => setLoading(false), 300);
+    return () => clearTimeout(timer);
   }, []);
 
-  const handleExploreClick = (id: number) => {
-    router.push(`/artwork/${id}`);
+  const handleExploreClick = (id: string) => {
+    router.push(`/artworks/${id}`);
   };
 
-  const handleBidClick = (id: number) => {
-    router.push(`/artwork/${id}`);
+  const handleBidClick = (id: string) => {
+    router.push(`/artworks/${id}`);
   };
+
+  // Get the two specific artworks for the hero section
+  const heroArtworkLeft = artworks.find((artwork) => artwork.id === "01");
+  const heroArtworkRight = artworks.find((artwork) => artwork.id === "02");
 
   if (loading) {
-    // The loading spinner remains the same
     return (
       <div
         style={{
@@ -174,12 +121,11 @@ export default function HomePage() {
     );
   }
 
-  // --- Main Layout Rendering ---
   return (
     <div
       style={{
-        background: "#0a0a0a",
-        color: "#ffffff",
+        background: "#ffffff", // ✅ Changed to white background for light theme
+        color: "#000000", // ✅ Changed to black text for light theme
         fontFamily:
           '"Montserrat", -apple-system, BlinkMacSystemFont, sans-serif',
         minHeight: "100vh",
@@ -187,24 +133,153 @@ export default function HomePage() {
       }}
     >
       <style>{`
-        /* Add a custom font */
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&display=swap');
-        
-        /* Global font for better resemblance */
-        body {
-            font-family: 'Montserrat', sans-serif !important;
-        }
-        
-        /* Keyframe for button hover on Hero left */
+        body { font-family: 'Montserrat', sans-serif !important; }
         @keyframes button-arrow-move {
-            0% { transform: translateX(0); }
-            50% { transform: translateX(6px); }
-            100% { transform: translateX(0); }
+          0% { transform: translateX(0); }
+          50% { transform: translateX(6px); }
+          100% { transform: translateX(0); }
+        }
+        .register-btn:hover .arrow-icon {
+          animation: button-arrow-move 0.7s infinite;
         }
         
-        /* For the REGISTER button */
-        .register-btn:hover .arrow-icon {
-            animation: button-arrow-move 0.7s infinite;
+        /* Mobile menu styles */
+        .mobile-menu {
+          display: none;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          background: white;
+          flex-direction: column;
+          padding: 20px;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+          z-index: 999;
+        }
+        
+        .mobile-menu.open {
+          display: flex;
+        }
+        
+        .mobile-menu a {
+          padding: 12px 0;
+          border-bottom: 1px solid #eee;
+          text-decoration: none;
+          color: #000;
+          font-size: 16px;
+        }
+        
+        .hamburger {
+          display: none;
+          flex-direction: column;
+          justify-content: space-around;
+          width: 30px;
+          height: 30px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+          z-index: 1001;
+        }
+        
+        .hamburger-line {
+          width: 100%;
+          height: 2px;
+          background: #000;
+          transition: all 0.3s;
+        }
+        
+        @media (max-width: 768px) {
+          .hamburger {
+            display: flex;
+          }
+          
+          nav {
+            display: none;
+          }
+          
+          .logo {
+            font-size: 22px !important;
+          }
+          
+          .header-icons {
+            gap: 15px !important;
+          }
+          
+          .hero-container {
+            padding: 10px !important;
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+            min-height: 60vh !important;
+          }
+          
+          .hero-content {
+            padding: 40px 20px !important;
+          }
+          
+          .hero-title {
+            font-size: 22px !important;
+            margin-bottom: 15px !important;
+          }
+          
+          .hero-artist {
+            font-size: 20px !important;
+            margin-bottom: 5px !important;
+          }
+          
+          .view-lots-btn {
+            padding: 6px 15px !important;
+            font-size: 11px !important;
+          }
+          
+          .middle-section {
+            padding: 60px 20px !important;
+          }
+          
+          .middle-content {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 20px !important;
+          }
+          
+          .middle-text {
+            max-width: 100% !important;
+          }
+          
+          .middle-title {
+            text-align: left !important;
+            margin-top: 20px !important;
+          }
+          
+          .cards-grid {
+            grid-template-columns: 1fr !important;
+            gap: 15px !important;
+          }
+          
+          .card {
+            height: auto !important;
+            min-height: 200px !important;
+          }
+          
+          .artworks-section {
+            padding: 40px 20px !important;
+          }
+          
+          .section-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+          }
+          
+          .view-all-link {
+            align-self: flex-end !important;
+          }
+          
+          .gallery-grid {
+            grid-template-columns: 1fr !important;
+            gap: 15px !important;
+          }
         }
       `}</style>
 
@@ -225,23 +300,34 @@ export default function HomePage() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            padding: "0 0",
           }}
         >
           <div
+            className="logo"
             style={{
               fontSize: "28px",
               fontWeight: "800",
               letterSpacing: "1px",
-              color: "#ffffff",
+              color: "#000000",
               textTransform: "uppercase",
               cursor: "pointer",
             }}
+            onClick={() => router.push("/")}
           >
-            The Doon Art Auctions
+            Palettes of Promise
           </div>
 
+          <button
+            className="hamburger"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <div className="hamburger-line"></div>
+            <div className="hamburger-line"></div>
+            <div className="hamburger-line"></div>
+          </button>
+
           <nav
+            className="desktop-nav"
             style={{
               display: "flex",
               gap: "40px",
@@ -249,364 +335,292 @@ export default function HomePage() {
               fontWeight: "500",
             }}
           >
-            {["HOME", "ABOUT", "ARTWORKS"].map((item) => (
+            {["HOME", "ARTWORKS"].map((item) => (
               <a
                 key={item}
-                href="#"
+                href={item === "ARTWORKS" ? "#artworks-section" : "#"}
                 style={{
                   textDecoration: "none",
-                  color:
-                    item === "HOME" ? "#ffffff" : "rgba(255, 255, 255, 0.7)",
+                  color: item === "HOME" ? "#000000" : "rgba(0, 0, 0, 0.7)", // ✅ Changed to black/gray
                   position: "relative",
                   transition: "color 0.3s ease",
                   letterSpacing: "1.5px",
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "#ffffff";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color =
-                    item === "HOME" ? "#ffffff" : "rgba(255, 255, 255, 0.7)";
-                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#000000")}
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color =
+                    item === "HOME" ? "#000000" : "rgba(0, 0, 0, 0.7)")
+                }
               >
                 {item}
               </a>
             ))}
           </nav>
+        </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "25px" }}>
-            <button
-              style={{
-                background: "none",
-                border: "none",
-                color: "#ffffff",
-                cursor: "pointer",
-              }}
-            >
-              <svg
-                width="20"
-                height="20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
+        <div className={`mobile-menu ${isMenuOpen ? "open" : ""}`}>
+          <div
+            className="mobile-logo"
+            style={{
+              fontSize: "24px",
+              fontWeight: "800",
+              letterSpacing: "1px",
+              color: "#000000",
+              textTransform: "uppercase",
+              cursor: "pointer",
+              textAlign: "center",
+              marginBottom: "20px",
+              padding: "10px 0",
+            }}
+            onClick={() => {
+              router.push("/");
+              setIsMenuOpen(false);
+            }}
+          >
+            Palettes of Promise
+          </div>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "15px" }}
+          >
+            {["HOME", "ARTWORKS"].map((item) => (
+              <a
+                key={item}
+                href={item === "ARTWORKS" ? "#artworks-section" : "#"}
+                style={{
+                  textDecoration: "none",
+                  color: item === "HOME" ? "#000000" : "rgba(0, 0, 0, 0.7)",
+                  position: "relative",
+                  transition: "color 0.3s ease",
+                  letterSpacing: "1.5px",
+                  textAlign: "center",
+                  padding: "8px 0",
+                }}
+                onClick={() => setIsMenuOpen(false)}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </button>
-            <a
-              href="#"
-              style={{
-                textDecoration: "none",
-                color: "#ffffff",
-                fontWeight: "600",
-                fontSize: "14px",
-                letterSpacing: "1.5px",
-              }}
-            >
-              LOGIN
-            </a>
+                {item}
+              </a>
+            ))}
           </div>
         </div>
       </header>
-
-      {/* Main Content */}
-      <main
-        style={{
-          maxWidth: "100%",
-          margin: "0 auto",
-          padding: "0",
-        }}
-      >
+      <main style={{ maxWidth: "100%", margin: "0 auto", padding: "0" }}>
         {/* Hero Section - Split Layout (As per screenshot) */}
         <div
+          className="hero-container"
           style={{
+            maxWidth: "1400px",
+            margin: "0 auto",
+            padding: "20px",
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
-            gap: "0",
-            marginBottom: "0",
+            gap: "20px",
+            marginBottom: "60px",
             minHeight: "calc(100vh - 80px)",
           }}
         >
-          {/* Left Hero - Dark with Image Background */}
+          {/* Left Hero */}
           <div
             style={{
-              backgroundImage: "url('/images/artwork4.jpg')",
+              backgroundImage: heroArtworkLeft
+                ? `url(${heroArtworkLeft.image})`
+                : "url('/images/artwork4.jpg')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               position: "relative",
+              overflow: "hidden",
             }}
           >
-            {/* Dark Overlay to make text readable */}
             <div
               style={{
                 position: "absolute",
                 inset: 0,
-                background: "rgba(0, 0, 0, 0.75)",
+                background: "rgba(0, 0, 0, 0.4)",
                 zIndex: 0,
               }}
             />
 
             <div
+              className="hero-content"
               style={{
                 position: "relative",
                 zIndex: 1,
-                padding: "100px 80px",
+                padding: "80px 60px",
                 height: "100%",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "center",
+                justifyContent: "flex-end",
               }}
             >
               <div
+                className="hero-artist"
                 style={{
-                  fontSize: "24px",
-                  fontWeight: "800",
+                  fontSize: "28px",
+                  fontWeight: "700",
                   letterSpacing: "1px",
                   color: "#ffffff",
                   textTransform: "uppercase",
-                  marginBottom: "10px",
+                  marginBottom: "8px",
+                  lineHeight: "1.2",
                 }}
               >
-                The Doon Art Auctions
+                {heroArtworkLeft?.artist || "ARTIST NAME"}
               </div>
               <h1
+                className="hero-title"
                 style={{
-                  fontSize: "clamp(48px, 5vw, 68px)",
-                  fontWeight: "900",
-                  lineHeight: "1.1",
+                  fontSize: "32px",
+                  fontWeight: "500",
+                  color: "#ffffff",
                   marginBottom: "24px",
-                  letterSpacing: "-2px",
-                  textTransform: "uppercase",
-                  maxWidth: "550px",
+                  lineHeight: "1.3",
+                  letterSpacing: "0.5px",
                 }}
               >
-                A STUDIO OF
-                <br />
-                TIMELESS CREATIONS
+                {heroArtworkLeft?.title || "ARTWORK TITLE"}
               </h1>
 
-              <p
-                style={{
-                  fontSize: "17px",
-                  maxWidth: "450px",
-                  marginBottom: "40px",
-                  lineHeight: "1.7",
-                  color: "rgba(255, 255, 255, 0.75)",
-                  fontWeight: "500",
-                }}
-              >
-                Our art studio is a creative sanctuary where imagination meets
-                craftsmanship. We provide a welcoming space for artists of all
-                levels to explore their passion.
-              </p>
-
               <button
-                className="register-btn"
+                className="view-lots-btn"
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  padding: "12px 30px",
-                  background: "transparent",
-                  border: "1px solid #ffffff",
-                  borderRadius: "2px",
-                  color: "white",
+                  display: "inline-block",
+                  padding: "8px 20px",
+                  background: "white",
+                  border: "none",
+                  borderRadius: "0",
+                  color: "#000000",
                   cursor: "pointer",
-                  fontSize: "15px",
+                  fontSize: "12px",
                   fontWeight: "600",
-                  transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                  width: "fit-content",
                   letterSpacing: "1px",
                   textTransform: "uppercase",
+                  transition: "background 0.2s ease",
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "transparent";
-                }}
+                onClick={() =>
+                  heroArtworkLeft && handleExploreClick(heroArtworkLeft.id)
+                }
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "#f0f0f0")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "white")
+                }
               >
-                REGISTER
-                <svg
-                  className="arrow-icon"
-                  style={{
-                    width: "20px",
-                    height: "20px",
-                    transition: "transform 0.4s ease",
-                  }}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                  />
-                </svg>
+                VIEW LOTS
               </button>
             </div>
           </div>
 
-          {/* Right Hero - Light Background */}
+          {/* Right Hero */}
           <div
             style={{
-              background: "#f4f4f4",
-              color: "#0a0a0a",
+              backgroundImage: heroArtworkRight
+                ? `url(${heroArtworkRight.image})`
+                : "url('/images/artwork1.jpg')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
               position: "relative",
-              display: "flex",
-              flexDirection: "column",
+              overflow: "hidden",
             }}
           >
-            {/* Image Placeholder [1] to [4] */}
             <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "rgba(0, 0, 0, 0.4)",
+                zIndex: 0,
+              }}
+            />
+
+            <div
+              className="hero-content"
               style={{
                 position: "relative",
-                padding: "80px",
-                paddingBottom: "40px",
-              }}
-            >
-              <div
-                style={{
-                  width: "100%",
-                  height: "350px",
-                  overflow: "hidden",
-                  marginBottom: "20px",
-                  border: "1px solid #ddd",
-                }}
-              >
-                <img
-                  src="/images/artwork1.jpg"
-                  alt="Featured Art"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    filter: "grayscale(100%) brightness(80%)",
-                  }}
-                />
-              </div>
-              {/* Image box number indicators */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: "60px",
-                  left: "60px",
-                  color: "#666",
-                  fontSize: "14px",
-                }}
-              >
-                [1]
-              </div>
-              <div
-                style={{
-                  position: "absolute",
-                  top: "60px",
-                  right: "60px",
-                  color: "#666",
-                  fontSize: "14px",
-                }}
-              >
-                [4]
-              </div>
-            </div>
-
-            {/* Right Hero Text and Socials */}
-            <div
-              style={{
-                padding: "0 80px 80px",
-                flex: 1,
+                zIndex: 1,
+                padding: "80px 60px",
+                height: "100%",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "flex-start",
+                justifyContent: "flex-end",
               }}
             >
-              <p
-                style={{
-                  fontSize: "16px",
-                  color: "#333",
-                  lineHeight: "1.7",
-                  maxWidth: "400px",
-                  marginBottom: "60px",
-                }}
-              >
-                More than just a studio, we are a community of creators. Our
-                space is designed to inspire and nurture artistic excellence.
-              </p>
-
               <div
+                className="hero-artist"
                 style={{
-                  borderTop: "1px solid #ccc",
-                  paddingTop: "30px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
+                  fontSize: "28px",
+                  fontWeight: "700",
+                  letterSpacing: "1px",
+                  color: "#ffffff",
+                  textTransform: "uppercase",
+                  marginBottom: "8px",
+                  lineHeight: "1.2",
                 }}
               >
-                <span
-                  style={{
-                    fontSize: "12px",
-                    fontWeight: "700",
-                    color: "#333",
-                    letterSpacing: "1px",
-                  }}
-                >
-                  FOLLOW US
-                </span>
-                <div style={{ display: "flex", gap: "12px" }}>
-                  {["f", "t", "in", "behance"].map((key) => (
-                    <button
-                      key={key}
-                      style={{
-                        width: "30px",
-                        height: "30px",
-                        borderRadius: "50%",
-                        background: "none",
-                        border: "1px solid #ccc",
-                        color: "#333",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        transition: "all 0.3s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = "#000";
-                        e.currentTarget.style.color = "#000";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "#ccc";
-                        e.currentTarget.style.color = "#333";
-                      }}
-                    >
-                      {socialIcons[key as keyof typeof socialIcons]}
-                    </button>
-                  ))}
-                </div>
+                {heroArtworkRight?.artist || "ARTIST NAME"}
               </div>
+              <h1
+                className="hero-title"
+                style={{
+                  fontSize: "32px",
+                  fontWeight: "500",
+                  color: "#ffffff",
+                  marginBottom: "24px",
+                  lineHeight: "1.3",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                {heroArtworkRight?.title || "ARTWORK TITLE"}
+              </h1>
+
+              <button
+                className="view-lots-btn"
+                style={{
+                  display: "inline-block",
+                  padding: "8px 20px",
+                  background: "white",
+                  border: "none",
+                  borderRadius: "0",
+                  color: "#000000",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  letterSpacing: "1px",
+                  textTransform: "uppercase",
+                  transition: "background 0.2s ease",
+                }}
+                onClick={() =>
+                  heroArtworkRight && handleExploreClick(heroArtworkRight.id)
+                }
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "#f0f0f0")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "white")
+                }
+              >
+                VIEW LOTS
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Middle Section - Dark Background with Boxes (As per screenshot) */}
+        {/* Rest of the content remains the same... */}
+        {/* Middle Section - Light Background with Boxes (As per screenshot) */}
         <div
+          className="middle-section"
           style={{
-            background: "#0a0a0a",
+            background: "#ffffff",
             padding: "100px 80px",
             maxWidth: "1400px",
             margin: "0 auto",
             position: "relative",
             overflow: "hidden",
-            color: "#ffffff",
+            color: "#000000",
           }}
         >
+          {" "}
+          {/* ✅ Changed background */}
           <div
+            className="middle-content"
             style={{
               display: "flex",
               justifyContent: "space-between",
@@ -616,19 +630,22 @@ export default function HomePage() {
               zIndex: 1,
             }}
           >
-            <div style={{ maxWidth: "450px" }}>
+            <div className="middle-text" style={{ maxWidth: "450px" }}>
               <p
                 style={{
                   fontSize: "17px",
-                  color: "rgba(255, 255, 255, 0.8)",
+                  color: "rgba(0, 0, 0, 0.8)",
                   lineHeight: "1.7",
                 }}
               >
-                A place where creativity has no rules! Whether you are picking
-                up a brush for the first time or refining your skills.
+                {" "}
+                {/* ✅ Changed color */}A place where creativity has no rules!
+                Whether you are picking up a brush for the first time or
+                refining your skills.
               </p>
             </div>
             <h2
+              className="middle-title"
               style={{
                 fontSize: "clamp(36px, 4vw, 56px)",
                 fontWeight: "900",
@@ -636,16 +653,18 @@ export default function HomePage() {
                 textAlign: "right",
                 lineHeight: "1.1",
                 letterSpacing: "-1px",
-                color: "#ffffff",
+                color: "#000000",
                 textTransform: "uppercase",
               }}
             >
+              {" "}
+              {/* ✅ Changed color */}
               INSPIRING CREATIVITY, ONE BRUSH AT A TIME
             </h2>
           </div>
-
           {/* Cards for Middle Section */}
           <div
+            className="cards-grid"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(4, 1fr)",
@@ -691,17 +710,18 @@ export default function HomePage() {
             ].map((card, index) => (
               <div
                 key={index}
+                className="card"
                 style={{
                   background: card.isSpecial
-                    ? "#ffffff"
+                    ? "#000000"
                     : card.isImageTop
-                    ? "#ffffff"
-                    : "transparent",
+                    ? "#f9f9f9"
+                    : "#ffffff", // ✅ Changed backgrounds
                   color:
-                    card.isSpecial || card.isImageTop ? "#0a0a0a" : "#ffffff",
+                    card.isSpecial || card.isImageTop ? "#000000" : "#000000", // ✅ Changed colors
                   border: card.isSpecial
                     ? "none"
-                    : "1px solid rgba(255, 255, 255, 0.1)",
+                    : "1px solid rgba(0, 0, 0, 0.1)", // ✅ Changed border color
                   borderRadius: "0",
                   padding: "25px",
                   height: "400px",
@@ -716,12 +736,12 @@ export default function HomePage() {
                     ? "0 10px 30px rgba(0, 0, 0, 0.2)"
                     : "none",
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-5px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.transform = "translateY(-5px)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.transform = "translateY(0)")
+                }
               >
                 {/* Number/Title on top-left (for text-only card) or bottom-left (for special card) */}
                 <div
@@ -730,7 +750,7 @@ export default function HomePage() {
                     top: card.isImageTop || card.isSpecial ? "25px" : "auto",
                     bottom: card.isImageTop ? "auto" : "25px",
                     left: "25px",
-                    color: card.isSpecial ? "#333" : "#ffffff",
+                    color: card.isSpecial ? "#ffffff" : "#000000", // ✅ Changed color
                     fontSize: "14px",
                     fontWeight: "700",
                     zIndex: 2,
@@ -757,19 +777,23 @@ export default function HomePage() {
                         fontSize: "42px",
                         fontWeight: "900",
                         marginBottom: "10px",
-                        color: "#0a0a0a",
+                        color: "#ffffff",
                         lineHeight: "1",
                       }}
                     >
+                      {" "}
+                      {/* ✅ Changed color */}
                       {card.number}
                     </h3>
                     <p
                       style={{
                         fontSize: "14px",
-                        color: "#666",
+                        color: "rgba(255, 255, 255, 0.7)",
                         lineHeight: "1.5",
                       }}
                     >
+                      {" "}
+                      {/* ✅ Changed color */}
                       {card.text}
                     </p>
                   </div>
@@ -802,9 +826,7 @@ export default function HomePage() {
                     <p
                       style={{
                         fontSize: "15px",
-                        color: card.isImageTop
-                          ? "#333"
-                          : "rgba(255, 255, 255, 0.9)",
+                        color: card.isImageTop ? "#333" : "rgba(0, 0, 0, 0.9)",
                         lineHeight: "1.6",
                         flexGrow: 1,
                       }}
@@ -818,65 +840,86 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* -------------------- NEW SECTION 1: ALL ARTWORKS GALLERY -------------------- */}
+        {/* Artworks Gallery - Light Theme */}
         <section
+          id="artworks-section"
+          className="artworks-section"
           style={{
             maxWidth: "1400px",
             margin: "0 auto",
-            padding: "80px",
-            paddingTop: "100px",
+            padding: "80px 80px 120px",
+            background: "#ffffff",
           }}
         >
-          <h2
+          <div
+            className="section-header"
             style={{
-              fontSize: "clamp(36px, 4vw, 48px)",
-              fontWeight: "900",
-              marginBottom: "60px",
-              textAlign: "left",
-              letterSpacing: "-1px",
-              color: "#ffffff",
-              textTransform: "uppercase",
-              borderBottom: "2px solid rgba(255, 255, 255, 0.1)",
-              paddingBottom: "15px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "40px",
             }}
           >
-            Artworks Gallery
-          </h2>
+            <h2
+              style={{
+                fontSize: "32px",
+                fontWeight: "400",
+                color: "#000000",
+                margin: 0,
+                fontFamily: "Georgia, serif",
+              }}
+            >
+              Artworks Gallery
+            </h2>
+            <a
+              href="#"
+              className="view-all-link"
+              style={{
+                fontSize: "14px",
+                color: "#666666",
+                textDecoration: "none",
+                transition: "color 0.3s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#000000")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#666666")}
+            >
+              View all
+            </a>
+          </div>
 
           <div
+            className="gallery-grid"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: "30px",
+              gap: "24px",
             }}
           >
             {artworks.map((artwork) => (
               <div
                 key={artwork.id}
                 style={{
-                  borderRadius: "0", // Square edges
+                  background: "#ffffff",
                   overflow: "hidden",
                   position: "relative",
-                  background:
-                    hoveredCard === artwork.id
-                      ? "rgba(255, 255, 255, 0.05)"
-                      : "transparent",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  transition: "all 0.4s ease",
+                  transition: "all 0.3s ease",
                   cursor: "pointer",
-                  transform:
+                  border:
                     hoveredCard === artwork.id
-                      ? "translateY(-5px)"
-                      : "translateY(0)",
+                      ? "1px solid #e0e0e0"
+                      : "1px solid transparent",
+                  borderRadius: "0", // Square edges as in reference
                 }}
                 onMouseEnter={() => setHoveredCard(artwork.id)}
                 onMouseLeave={() => setHoveredCard(null)}
+                onClick={() => handleExploreClick(artwork.id)}
               >
                 <div
                   style={{
                     position: "relative",
-                    paddingBottom: "75%",
+                    paddingBottom: "100%", // Square aspect ratio
                     overflow: "hidden",
+                    background: "#f9f9f9",
                   }}
                 >
                   <img
@@ -888,127 +931,124 @@ export default function HomePage() {
                       width: "100%",
                       height: "100%",
                       objectFit: "cover",
-                      transition: "transform 0.6s ease",
+                      transition: "transform 0.3s ease",
                       transform:
-                        hoveredCard === artwork.id ? "scale(1.05)" : "scale(1)",
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      background:
-                        "linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, transparent 50%)",
+                        hoveredCard === artwork.id ? "scale(1.02)" : "scale(1)",
                     }}
                   />
                 </div>
 
-                <div style={{ padding: "20px" }}>
+                <div style={{ padding: "16px 0" }}>
+                  {/* Title - Bold, First */}
                   <h3
                     style={{
-                      fontSize: "20px",
-                      fontWeight: "700",
-                      marginBottom: "5px",
-                      color: "#ffffff",
-                      letterSpacing: "0.5px",
+                      fontSize: "15px",
+                      fontWeight: "700", // Bold
+                      color: "#000000",
+                      marginBottom: "4px",
+                      margin: "0 0 4px 0",
+                      lineHeight: "1.3",
                     }}
                   >
                     {artwork.title}
                   </h3>
+                  {/* Artist Name - Second */}
                   <p
                     style={{
-                      fontSize: "14px",
-                      color: "rgba(255, 255, 255, 0.7)",
-                      marginBottom: "15px",
+                      fontSize: "13px",
+                      fontWeight: "400",
+                      color: "#333333",
+                      marginBottom: "8px",
+                      margin: "0 0 8px 0",
+                      textTransform: "none", // Remove uppercase
+                      letterSpacing: "0.2px",
                     }}
                   >
-                    by {artwork.artist}
+                    {artwork.artist}
                   </p>
-
+                  {/* Pulsing Starting Bid - Third */}
                   <div
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "20px",
-                      borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-                      paddingTop: "15px",
+                      marginBottom: "12px",
+                      padding: "4px 0",
                     }}
                   >
-                    <span
+                    <p
                       style={{
-                        fontSize: "12px",
-                        fontWeight: "500",
-                        color: "rgba(255, 255, 255, 0.6)",
-                        textTransform: "uppercase",
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        color: "#004276", // Primary color
+                        margin: 0,
+                        display: "inline-block",
+                        // --- Pulsing Effect ---
+                        opacity: 1,
+                        animation: "pulse 1.5s infinite ease-in-out",
                       }}
                     >
-                      Current Bid
-                    </span>
-                    <span
-                      style={{
-                        fontSize: "20px",
-                        fontWeight: "900",
-                        color: "#8b5cf6", // Accent color
-                      }}
-                    >
-                      ${artwork.currentBid.toLocaleString()}
-                    </span>
+                      Starting Bid: ₹{artwork.startingBid.toLocaleString()}
+                    </p>
                   </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      marginTop: "10px",
-                    }}
-                  >
+                  {/* Buttons - Fourth */}
+                  <div style={{ display: "flex", gap: "8px" }}>
                     <button
-                      onClick={() => handleBidClick(artwork.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleExploreClick(artwork.id);
+                      }} // Stop click propagation to card
                       style={{
                         flex: 1,
-                        padding: "10px 15px",
-                        background: "#8b5cf6",
-                        border: "none",
-                        borderRadius: "2px",
-                        color: "white",
+                        padding: "8px 12px",
+                        background: "#CBC3BA", // Background color
+                        border: "1px solid #CBC3BA", // Border color
+                        borderRadius: "0", // Square button
+                        color: "#000000", // Text color
                         cursor: "pointer",
-                        fontWeight: "600",
-                        fontSize: "13px",
-                        transition: "background 0.3s ease",
+                        fontWeight: "500",
+                        fontSize: "12px",
+                        transition: "background 0.2s ease, color 0.2s ease",
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#7c3aed";
+                        e.currentTarget.style.background = "#004276"; // Primary color on hover
+                        e.currentTarget.style.color = "#ffffff";
+                        e.currentTarget.style.borderColor = "#004276"; // Border color on hover
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#8b5cf6";
+                        e.currentTarget.style.background = "#CBC3BA";
+                        e.currentTarget.style.color = "#000000";
+                        e.currentTarget.style.borderColor = "#CBC3BA";
+                      }}
+                    >
+                      Explore Now
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleBidClick(artwork.id);
+                      }} // Stop click propagation to card
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        background: "#004276", // Primary color
+                        border: "1px solid #004276", // Border color
+                        borderRadius: "0", // Square button
+                        color: "#ffffff", // Text color
+                        cursor: "pointer",
+                        fontWeight: "500",
+                        fontSize: "12px",
+                        transition: "background 0.2s ease, color 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "#ffffff"; // White on hover
+                        e.currentTarget.style.color = "#004276"; // Primary color text on hover
+                        e.currentTarget.style.borderColor = "#004276"; // Border color on hover
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "#004276";
+                        e.currentTarget.style.color = "#ffffff";
+                        e.currentTarget.style.borderColor = "#004276";
                       }}
                     >
                       Bid Now
-                    </button>
-                    <button
-                      onClick={() => handleExploreClick(artwork.id)}
-                      style={{
-                        flex: 1,
-                        padding: "10px 15px",
-                        background: "transparent",
-                        border: "1px solid rgba(255, 255, 255, 0.3)",
-                        borderRadius: "2px",
-                        color: "white",
-                        cursor: "pointer",
-                        fontWeight: "600",
-                        fontSize: "13px",
-                        transition: "background 0.3s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background =
-                          "rgba(255, 255, 255, 0.1)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "transparent";
-                      }}
-                    >
-                      Explore
                     </button>
                   </div>
                 </div>
@@ -1017,177 +1057,17 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* -------------------- NEW SECTION 2: TRENDING ARTWORK -------------------- */}
-        <section
-          style={{
-            maxWidth: "1400px",
-            margin: "0 auto",
-            padding: "80px",
-            paddingTop: "100px",
-            paddingBottom: "120px",
-          }}
-        >
-          <h2
-            style={{
-              fontSize: "clamp(36px, 4vw, 48px)",
-              fontWeight: "900",
-              marginBottom: "60px",
-              textAlign: "left",
-              letterSpacing: "-1px",
-              color: "#ffffff",
-              textTransform: "uppercase",
-              borderBottom: "2px solid rgba(255, 255, 255, 0.1)",
-              paddingBottom: "15px",
-            }}
-          >
-            Trending Art for the Week
-          </h2>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1.5fr 1fr", // A main trending piece and two smaller ones
-              gap: "30px",
-              minHeight: "500px",
-            }}
-          >
-            {/* Main Trending Card */}
-            <div
-              style={{
-                backgroundImage: "url('/images/artwork3.jpg')",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                position: "relative",
-                borderRadius: "0",
-                overflow: "hidden",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
-                cursor: "pointer",
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background:
-                    "linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 80%)",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "30px",
-                  left: "30px",
-                  zIndex: 1,
-                  maxWidth: "80%",
-                }}
-              >
-                <p
-                  style={{
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    color: "#8b5cf6",
-                    textTransform: "uppercase",
-                    marginBottom: "10px",
-                  }}
-                >
-                  Featured | Top Bid $8,900
-                </p>
-                <h3
-                  style={{
-                    fontSize: "36px",
-                    fontWeight: "900",
-                    lineHeight: "1.2",
-                    color: "white",
-                  }}
-                >
-                  Silent Echo in Digital Dreams
-                </h3>
-                <p
-                  style={{
-                    fontSize: "16px",
-                    color: "rgba(255, 255, 255, 0.7)",
-                    marginTop: "5px",
-                  }}
-                >
-                  By Elena Petrova
-                </p>
-              </div>
-            </div>
-
-            {/* Side Trending Cards */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateRows: "1fr 1fr",
-                gap: "30px",
-              }}
-            >
-              {[
-                {
-                  title: "Cosmic Flow",
-                  artist: "Maya Chen",
-                  image: "/images/artwork2.jpg",
-                },
-                {
-                  title: "Ocean Depths",
-                  artist: "Alex Rivera",
-                  image: "/images/artwork4.jpg",
-                },
-              ].map((item, index) => (
-                <div
-                  key={index}
-                  style={{
-                    backgroundImage: `url(${item.image})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    position: "relative",
-                    borderRadius: "0",
-                    overflow: "hidden",
-                    border: "1px solid rgba(255, 255, 255, 0.15)",
-                    cursor: "pointer",
-                  }}
-                >
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      background:
-                        "linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 60%)",
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "20px",
-                      left: "20px",
-                      zIndex: 1,
-                    }}
-                  >
-                    <h4
-                      style={{
-                        fontSize: "24px",
-                        fontWeight: "800",
-                        color: "white",
-                        lineHeight: "1.2",
-                      }}
-                    >
-                      {item.title}
-                    </h4>
-                    <p
-                      style={{
-                        fontSize: "14px",
-                        color: "rgba(255, 255, 255, 0.7)",
-                        marginTop: "5px",
-                      }}
-                    >
-                      By {item.artist}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* Add the pulse animation to the style tag */}
+        <style>{`
+          @keyframes pulse {
+            0%, 100% {
+              opacity: 1;
+            }
+            50% {
+              opacity: 0.7; /* Adjust this value for the depth of the pulse */
+            }
+          }
+        `}</style>
       </main>
     </div>
   );

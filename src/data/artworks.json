@@ -1,0 +1,466 @@
+{
+  "artworks": [
+    {
+      "id": "01",
+      "lotNumber": "01",
+      "title": "Vasundhara",
+      "artist": "Pradiptaa Chakraborty",
+      "medium": "Oil on Canvas",
+      "dimensions": {
+        "height": "2'",
+        "width": "2'",
+        "formatted": "2' x 2'"
+      },
+      "startingBid": 250000,
+      "minimumIncrement": 25000,
+      "page": 4,
+      "image": "/images/1.jpg"
+    },
+    {
+      "id": "02",
+      "lotNumber": "02",
+      "title": "Monochrome Memory (The Art School)",
+      "artist": "Pratham Kaushik",
+      "medium": "Acrylic on Canvas",
+      "dimensions": {
+        "height": "2'",
+        "width": "2'",
+        "formatted": "2' x 2'"
+      },
+      "startingBid": 70000,
+      "minimumIncrement": 10000,
+      "page": 5,
+      "image": "/images/2.jpg"
+    },
+    {
+      "id": "03",
+      "lotNumber": "03",
+      "title": "Crown of Thorns",
+      "artist": "Sudesh Mahan",
+      "medium": "Pen & Panpastel Drawing",
+      "dimensions": {
+        "height": "30\"",
+        "width": "23\"",
+        "formatted": "30\" x 23\""
+      },
+      "startingBid": 55000,
+      "minimumIncrement": 10000,
+      "page": 6,
+      "image": "/images/3.jpg"
+    },
+    {
+      "id": "04",
+      "lotNumber": "04",
+      "title": "Parijaat Vriksh",
+      "artist": "Victor Selvaraj",
+      "medium": "Acrylic on Canvas",
+      "dimensions": {
+        "height": "70\"",
+        "width": "59\"",
+        "formatted": "70\" x 59\""
+      },
+      "startingBid": 450000,
+      "minimumIncrement": 25000,
+      "page": 7,
+      "image": "/images/4.jpg"
+    },
+    {
+      "id": "05",
+      "lotNumber": "05",
+      "title": "Soulscape Entangled I",
+      "artist": "S.K. Sahajahan",
+      "medium": "Acrylic on Canvas (Tempera Process)",
+      "dimensions": {
+        "height": "42\"",
+        "width": "36\"",
+        "formatted": "42\" x 36\""
+      },
+      "startingBid": 350000,
+      "minimumIncrement": 25000,
+      "page": 8,
+      "image": "/images/5.jpg"
+    },
+    {
+      "id": "06",
+      "lotNumber": "06",
+      "title": "Future Fossil",
+      "artist": "Anju Kaushik",
+      "medium": "Mixed Media (Wire mesh, nails and metal on board)",
+      "dimensions": {
+        "height": "40\"",
+        "width": "12\"",
+        "formatted": "40\" x 12\""
+      },
+      "startingBid": 60000,
+      "minimumIncrement": 25000,
+      "page": 9,
+      "image": "/images/6.jpg"
+    },
+    {
+      "id": "07",
+      "lotNumber": "07",
+      "title": "Continuance 2",
+      "artist": "Dipto N. Chattopadhyay",
+      "medium": "Acrylic on Canvas (Tempera Process)",
+      "dimensions": {
+        "height": "40\"",
+        "width": "51\"",
+        "formatted": "40\" x 51\""
+      },
+      "startingBid": 550000,
+      "minimumIncrement": 50000,
+      "page": 10,
+      "image": "/images/7.jpg"
+    },
+    {
+      "id": "08",
+      "lotNumber": "08",
+      "title": "Abdullah's Buddha",
+      "artist": "Sudesh Mahan",
+      "medium": "Aluminium",
+      "dimensions": {
+        "height": "27\" (with base)",
+        "formatted": "27\" (with base)"
+      },
+      "weight": "6 Kg (approx.)",
+      "startingBid": 350000,
+      "minimumIncrement": 30000,
+      "page": 11,
+      "image": "/images/8.jpg"
+    },
+    {
+      "id": "09",
+      "lotNumber": "09",
+      "title": "Reflection of a Journey",
+      "artist": "Dipto N. Chattopadhyay",
+      "medium": "Mixed Media",
+      "dimensions": {
+        "height": "4'",
+        "width": "8'",
+        "formatted": "4' x 8'"
+      },
+      "startingBid": 1200000,
+      "minimumIncrement": 50000,
+      "page": 12,
+      "image": "/images/9.jpg"
+    },
+    {
+      "id": "10",
+      "lotNumber": "10",
+      "title": "Impressionist Portrait",
+      "artist": "Sudesh Mahan",
+      "medium": "Oil Pastel Drawing",
+      "dimensions": {
+        "height": "30\"",
+        "width": "23\"",
+        "formatted": "30\" x 23\""
+      },
+      "startingBid": 55000,
+      "minimumIncrement": 10000,
+      "page": 13,
+      "image": "/images/10.jpg"
+    },
+    {
+      "id": "11",
+      "lotNumber": "11",
+      "title": "Experiences of Life",
+      "artist": "Renuka Gulati",
+      "medium": "Bronze",
+      "dimensions": {
+        "formatted": "19\" x 18\" x 8.5\""
+      },
+      "startingBid": 250000,
+      "minimumIncrement": 25000,
+      "page": 14,
+      "image": "/images/11.jpg"
+    },
+    {
+      "id": "12",
+      "lotNumber": "12",
+      "title": "The Doon Tree",
+      "artist": "Sudesh Mahan",
+      "medium": "Oil & Dry Pastel Drawing",
+      "dimensions": {
+        "height": "15\"",
+        "width": "22\"",
+        "formatted": "15\" x 22\""
+      },
+      "startingBid": 30000,
+      "minimumIncrement": 10000,
+      "page": 15,
+      "image": "/images/12.jpg"
+    },
+    {
+      "id": "13",
+      "lotNumber": "13",
+      "title": "In This Moment",
+      "artist": "Neeraja Divate",
+      "medium": "Mixed Media on Somerset Paper",
+      "dimensions": {
+        "height": "22\"",
+        "width": "30\"",
+        "formatted": "22\" x 30\""
+      },
+      "startingBid": 125000,
+      "minimumIncrement": 20000,
+      "page": 16,
+      "image": "/images/13.jpg"
+    },
+    {
+      "id": "14",
+      "lotNumber": "14",
+      "title": "Soulscape Entangled II",
+      "artist": "S.K. Sahajahan",
+      "medium": "Reverse Painting on Acrylic Sheet",
+      "dimensions": {
+        "height": "29\"",
+        "width": "28\"",
+        "formatted": "29\" x 28\""
+      },
+      "startingBid": 225000,
+      "minimumIncrement": 25000,
+      "page": 17,
+      "image": "/images/14.jpg"
+    },
+    {
+      "id": "15",
+      "lotNumber": "15",
+      "title": "Silent Structures",
+      "artist": "Alka Jhamb",
+      "medium": "Mixed Media, Acrylic and Oil on Canvas",
+      "dimensions": {
+        "height": "36\"",
+        "width": "36\"",
+        "formatted": "36\" x 36\""
+      },
+      "startingBid": 200000,
+      "minimumIncrement": 25000,
+      "page": 18,
+      "image": "/images/15.jpg"
+    },
+    {
+      "id": "16",
+      "lotNumber": "16",
+      "title": "A Lady",
+      "artist": "Aloke Tirtha Bhowmick",
+      "medium": "Acrylic on Canvas",
+      "dimensions": {
+        "height": "5'",
+        "width": "4'",
+        "formatted": "5' x 4'"
+      },
+      "startingBid": 325000,
+      "minimumIncrement": 25000,
+      "page": 19,
+      "image": "/images/16.jpg"
+    },
+    {
+      "id": "17",
+      "lotNumber": "17",
+      "title": "Purushartha 33",
+      "artist": "Dilesh Hazare",
+      "medium": "Oil on Canvas",
+      "dimensions": {
+        "height": "4'",
+        "width": "3.5'",
+        "formatted": "4' x 3.5'"
+      },
+      "startingBid": 400000,
+      "minimumIncrement": 25000,
+      "page": 20,
+      "image": "/images/17.jpg"
+    },
+    {
+      "id": "18",
+      "lotNumber": "18",
+      "title": "Soulscape Entangled III",
+      "artist": "S.K. Sahajahan",
+      "medium": "Acrylic on Paper",
+      "dimensions": {
+        "height": "23\"",
+        "width": "30\"",
+        "formatted": "23\" x 30\""
+      },
+      "startingBid": 75000,
+      "minimumIncrement": 20000,
+      "page": 21,
+      "image": "/images/18.jpg"
+    },
+    {
+      "id": "19",
+      "lotNumber": "19",
+      "title": "Reclaim Horizon",
+      "artist": "Alka Jhamb",
+      "medium": "Mixed media with sun board, acrylic and oil on canvas board",
+      "dimensions": {
+        "height": "30\"",
+        "width": "48\"",
+        "formatted": "30\" x 48\""
+      },
+      "startingBid": 250000,
+      "minimumIncrement": 20000,
+      "page": 22,
+      "image": "/images/19.jpg"
+    },
+    {
+      "id": "20",
+      "lotNumber": "20",
+      "title": "Hoovamma: Portrait of a Flower Vendor",
+      "artist": "Sudesh Mahan",
+      "medium": "Oil on Canvas",
+      "dimensions": {
+        "height": "47\"",
+        "width": "35\"",
+        "formatted": "47\" x 35\""
+      },
+      "startingBid": 220000,
+      "minimumIncrement": 25000,
+      "page": 23,
+      "image": "/images/20.jpg"
+    },
+    {
+      "id": "21",
+      "lotNumber": "21",
+      "title": "Reverse Engineering the Industrial",
+      "artist": "Anju Kaushik",
+      "medium": "Mixed Media (Wire mesh, nails, metal and concrete on board)",
+      "dimensions": {
+        "height": "20\"",
+        "width": "40\"",
+        "formatted": "20\" x 40\""
+      },
+      "startingBid": 120000,
+      "minimumIncrement": 20000,
+      "page": 24,
+      "image": "/images/21.jpg"
+    },
+    {
+      "id": "22",
+      "lotNumber": "22",
+      "title": "King and Queen",
+      "artist": "Aloke Tirtha Bhowmick",
+      "medium": "Acrylic on Canvas",
+      "dimensions": {
+        "height": "42\"",
+        "width": "36\"",
+        "formatted": "42\" x 36\""
+      },
+      "startingBid": 180000,
+      "minimumIncrement": 20000,
+      "page": 25,
+      "image": "/images/22.jpg"
+    },
+    {
+      "id": "23",
+      "lotNumber": "23",
+      "title": "Nude",
+      "artist": "Sudesh Mahan",
+      "medium": "Pen & Panpastel Drawing",
+      "dimensions": {
+        "height": "30\"",
+        "width": "23\"",
+        "formatted": "30\" x 23\""
+      },
+      "startingBid": 55000,
+      "minimumIncrement": 10000,
+      "page": 26,
+      "image": "/images/23.jpg"
+    },
+    {
+      "id": "24",
+      "lotNumber": "24",
+      "title": "Continuance 1",
+      "artist": "Dipto N. Chattopadhyay",
+      "medium": "Acrylic on Canvas (Tempera Process)",
+      "dimensions": {
+        "height": "38\"",
+        "width": "51\"",
+        "formatted": "38\" x 51\""
+      },
+      "startingBid": 500000,
+      "minimumIncrement": 50000,
+      "page": 27,
+      "image": "/images/24.jpg"
+    },
+    {
+      "id": "25",
+      "lotNumber": "25",
+      "title": "Soulscape Entangled IV",
+      "artist": "S.K. Sahajahan",
+      "medium": "Acrylic on Paper",
+      "dimensions": {
+        "height": "23\"",
+        "width": "30\"",
+        "formatted": "23\" x 30\""
+      },
+      "startingBid": 75000,
+      "minimumIncrement": 20000,
+      "page": 28,
+      "image": "/images/25.jpg"
+    },
+    {
+      "id": "26",
+      "lotNumber": "26",
+      "title": "The Buddha Somersault",
+      "artist": "Sudesh Mahan",
+      "medium": "Oil on Canvas",
+      "dimensions": {
+        "height": "66\"",
+        "width": "42\"",
+        "formatted": "66\" x 42\""
+      },
+      "startingBid": 450000,
+      "minimumIncrement": 50000,
+      "page": 29,
+      "image": "/images/26.jpg"
+    },
+    {
+      "id": "27",
+      "lotNumber": "27",
+      "title": "Canopy of Coexistence",
+      "artist": "Pratham Kaushik",
+      "medium": "Acrylic on Canvas",
+      "dimensions": {
+        "height": "42\"",
+        "width": "36\"",
+        "formatted": "42\" x 36\""
+      },
+      "startingBid": 150000,
+      "minimumIncrement": 25000,
+      "page": 30,
+      "image": "/images/27.jpg"
+    },
+    {
+      "id": "28",
+      "lotNumber": "28",
+      "title": "Waiting",
+      "artist": "Sudesh Mahan",
+      "medium": "Oil Pastel Drawing",
+      "dimensions": {
+        "height": "30\"",
+        "width": "23\"",
+        "formatted": "30\" x 23\""
+      },
+      "startingBid": 55000,
+      "minimumIncrement": 10000,
+      "page": 31,
+      "image": "/images/28.jpg"
+    },
+    {
+      "id": "29",
+      "lotNumber": "29",
+      "title": "Listening to the Unspoken",
+      "artist": "Dipto N. Chattopadhyay",
+      "medium": "Acrylic tempera on paper",
+      "dimensions": {
+        "height": "24\"",
+        "width": "36\"",
+        "formatted": "24\" x 36\""
+      },
+      "startingBid": 400000,
+      "minimumIncrement": 25000,
+      "page": 32,
+      "image": "/images/29.jpg"
+    }
+  ]
+}

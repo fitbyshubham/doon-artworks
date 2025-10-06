@@ -1,157 +1,172 @@
 // src/app/artwork/[id]/page.tsx
 "use client";
-
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-// import { supabase } from "@/lib/supabase"; // Commented out as it's not provided
+import { useRouter } from "next/navigation";
+import { artworks as artworkData } from "@/data/artworks.json"; // Import the JSON data
 
-interface Artwork {
-  id: number;
+// --- UPDATED INTERFACES TO MATCH YOUR JSON STRUCTURE ---
+interface ArtworkJSON {
+  id: string; // JSON uses string IDs like "01", "29"
+  lotNumber: string;
   title: string;
   artist: string;
-  lotNumber: string;
+  medium: string;
+  dimensions: {
+    height: string;
+    width: string;
+    formatted: string;
+  };
   startingBid: number;
   minimumIncrement: number;
-  topBid: number;
+  page: number;
+  image: string; // Assuming this is the main image
+  // coverImage is not in your JSON, so we'll use 'image' or add a field if needed
+}
+
+// --- INTERFACES & STATE (Keeping original structure for form handling) ---
+interface Artwork {
+  // Create an internal structure that includes 'topBid' for logic
+  id: string;
+  lotNumber: string;
+  title: string;
+  artist: string;
   medium: string;
-  dimensions: string;
-  description: string;
+  dimensions: string; // Using the formatted string
+  startingBid: number;
+  minimumIncrement: number;
+  page: number;
   image: string;
-  coverImage: string;
+  topBid: number; // Calculate or derive this
 }
 
 interface BidFormData {
   name: string;
   email: string;
-  phone: string;
+  phone: string; // Will handle +91 prefix separately
   bidAmount: string;
 }
 
-export default function ArtworkDetailPage() {
+// --- MOCK BID HISTORY GENERATION ---
+interface BidHistoryItem {
+  id: number;
+  bid: number;
+  time: string; // e.g., "X hours/days ago"
+}
+
+// Function to generate mock bid history based on artwork data
+const generateMockBidHistory = (
+  startingBid: number,
+  minimumIncrement: number,
+  count: number = 5
+): BidHistoryItem[] => {
+  const history: BidHistoryItem[] = [];
+  let currentBid = startingBid; // Start from the starting bid
+
+  for (let i = 0; i < count; i++) {
+    // Randomly increase the bid by at least minimumIncrement and up to a few increments
+    const incrementToAdd = Math.floor(Math.random() * 5) + 1; // 1 to 5 increments
+    const newBid = currentBid + minimumIncrement * incrementToAdd;
+    currentBid = newBid; // Update for the next iteration
+
+    // Generate a random time string (e.g., "1h ago", "30m ago", "2d ago")
+    const timeUnits = ["m", "h", "d"]; // minutes, hours, days
+    const timeUnit = timeUnits[Math.floor(Math.random() * timeUnits.length)];
+    const timeValue = Math.floor(Math.random() * 10) + 1; // 1 to 10 units
+    const timeString = `${timeValue}${timeUnit} ago`;
+
+    history.push({
+      id: i + 1,
+      bid: newBid,
+      time: timeString,
+    });
+  }
+
+  // Reverse to show most recent first
+  return history.reverse();
+};
+
+// --- UPDATED PAGE COMPONENT ---
+export default function ArtworkDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const [artwork, setArtwork] = useState<Artwork | null>(null);
   const [formData, setFormData] = useState<BidFormData>({
     name: "",
     email: "",
-    phone: "",
+    phone: "", // User will enter only the 10-digit number
     bidAmount: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [imageZoom, setImageZoom] = useState(false);
-  const [activeImage, setActiveImage] = useState<"main" | "cover">("main");
+  // const [activeImage, setActiveImage] = useState<"main" | "cover">("main"); // Assuming single image for now
   const router = useRouter();
-  const params = useParams();
 
+  // --- UPDATED DATA FETCHING & LOGIC ---
   useEffect(() => {
-    // Fetch artwork data based on ID
-    const fetchArtwork = async () => {
-      const artworkId = params.id as string;
-      const idNum = parseInt(artworkId);
+    const fetchData = async () => {
+      const resolvedParams = await params;
+      const artworkId = resolvedParams.id;
 
-      // Mock data for demonstration - expanded to handle more IDs
-      const mockArtworks: Artwork[] = [
-        {
-          id: 1,
-          title: "Abstract Expression",
-          artist: "Alex Rivera",
-          lotNumber: "LOT-001",
-          startingBid: 2500,
-          minimumIncrement: 100,
-          topBid: 2800,
-          medium: "Acrylic on Canvas",
-          dimensions: '48" x 36"',
-          description:
-            "A bold exploration of color and form that challenges traditional boundaries. This piece represents a journey through emotional landscapes, where vibrant hues collide with subtle textures to create a visual symphony that speaks to the soul. Its abstract nature invites multiple interpretations, making it a powerful statement piece for any modern collection. The layers of paint build depth and intensity, reflecting the complexity of urban life and raw emotion.",
-          image: "/images/artwork1.jpg",
-          coverImage: "/images/artwork2.jpg",
-        },
-        {
-          id: 2,
-          title: "Urban Landscape",
-          artist: "Maya Chen",
-          lotNumber: "LOT-002",
-          startingBid: 1800,
-          minimumIncrement: 50,
-          topBid: 2100,
-          medium: "Oil on Canvas",
-          dimensions: '36" x 24"',
-          description:
-            "Capturing the energy and rhythm of city life through dynamic brushstrokes. The interplay of light and shadow creates a mesmerizing dance that reflects the constant motion and vibrancy of urban existence. The artist uses a palette knife to give texture to the concrete jungles and a soft brush for the fleeting city lights, merging classical technique with contemporary subject matter.",
-          image: "/images/artwork2.jpg",
-          coverImage: "/images/artwork3.jpg",
-        },
-        {
-          id: 3,
-          title: "Cosmic Flow",
-          artist: "Elena Petrova",
-          lotNumber: "LOT-003",
-          startingBid: 5000,
-          minimumIncrement: 200,
-          topBid: 5600,
-          medium: "Digital Print on Aluminium",
-          dimensions: '60" x 40"',
-          description:
-            "An immersive digital creation that simulates the vast, swirling beauty of a nebula. 'Cosmic Flow' utilizes deep blues and purples punctuated by bursts of starlight, inviting the viewer to contemplate the infinite. It is a fusion of technology and abstract space art, perfect for a high-tech modern interior.",
-          image: "/images/artwork3.jpg",
-          coverImage: "/images/artwork4.jpg",
-        },
-        {
-          id: 4,
-          title: "Nature's Whisper",
-          artist: "Jordan Lee",
-          lotNumber: "LOT-004",
-          startingBid: 1200,
-          minimumIncrement: 50,
-          topBid: 1450,
-          medium: "Watercolor on Paper",
-          dimensions: '20" x 16"',
-          description:
-            "A serene and delicate piece capturing the subtle movements of a forest in morning mist. The soft, translucent layers of watercolor evoke a sense of peace and natural harmony. This artwork brings a tranquil, organic feel to any space, highlighting the beauty of fleeting moments in nature.",
-          image: "/images/artwork4.jpg",
-          coverImage: "/images/artwork1.jpg",
-        },
-      ];
+      // Find the artwork based on the ID from the URL in the imported JSON data
+      const foundArtworkJSON = artworkData.find((art) => art.id === artworkId);
 
-      // To ensure continuity, cycle through mock data if ID is out of range (like for 29 cards)
-      const foundArtwork =
-        mockArtworks.find((art) => art.id === idNum) ||
-        mockArtworks[(idNum - 1) % mockArtworks.length];
+      if (foundArtworkJSON) {
+        // Map JSON data to the internal Artwork interface
+        // For now, assume topBid is the startingBid or derive it differently if needed
+        const mappedArtwork: Artwork = {
+          id: foundArtworkJSON.id,
+          lotNumber: foundArtworkJSON.lotNumber,
+          title: foundArtworkJSON.title,
+          artist: foundArtworkJSON.artist,
+          medium: foundArtworkJSON.medium,
+          dimensions: foundArtworkJSON.dimensions.formatted,
+          startingBid: foundArtworkJSON.startingBid,
+          minimumIncrement: foundArtworkJSON.minimumIncrement,
+          page: foundArtworkJSON.page,
+          image: foundArtworkJSON.image,
+          topBid: foundArtworkJSON.startingBid, // Using starting bid as initial top bid
+        };
 
-      if (foundArtwork) {
-        setArtwork(foundArtwork);
-        // Set minimum bid amount in form
+        setArtwork(mappedArtwork);
+
+        // Set initial bid amount to starting bid + minimum increment
         setFormData((prev) => ({
           ...prev,
           bidAmount: (
-            foundArtwork.topBid + foundArtwork.minimumIncrement
+            mappedArtwork.topBid + mappedArtwork.minimumIncrement
           ).toString(),
         }));
+      } else {
+        // Handle case where artwork is not found
+        console.error(`Artwork with ID ${artworkId} not found in JSON data.`);
+        // You could redirect to a 404 page or set an error state
+        // router.push('/404'); // Example redirect
       }
     };
 
-    if (params.id) {
-      fetchArtwork();
-    }
-  }, [params.id]);
+    fetchData();
+  }, [params]);
 
+  // --- UPDATED VALIDATION (Using mapped artwork's topBid and minimumIncrement) ---
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    }
-
+    if (!formData.name.trim()) newErrors.name = "Name is required";
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Please enter a valid email";
     }
 
+    // Validate phone number (10 digits after +91)
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
-    } else if (!/^\+?[\d\s\-\(\)]{10,}$/.test(formData.phone)) {
-      newErrors.phone = "Please enter a valid phone number";
+    } else if (!/^\d{10}$/.test(formData.phone.trim())) {
+      // Check for exactly 10 digits
+      newErrors.phone = "Please enter a valid 10-digit phone number";
     }
 
     if (!formData.bidAmount) {
@@ -164,21 +179,27 @@ export default function ArtworkDetailPage() {
         artwork &&
         bidAmount < artwork.topBid + artwork.minimumIncrement
       ) {
-        newErrors.bidAmount = `Bid must be at least $${(
+        newErrors.bidAmount = `Bid must be at least ₹${(
           artwork.topBid + artwork.minimumIncrement
         ).toLocaleString()}`;
       }
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // --- UPDATED INPUT HANDLER (For phone, only store digits) ---
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Clear error when user starts typing
+    if (name === "phone") {
+      // Allow only digits and limit to 10
+      const digitsOnly = value.replace(/\D/g, "").slice(0, 10);
+      setFormData((prev) => ({ ...prev, [name]: digitsOnly }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -186,50 +207,38 @@ export default function ArtworkDetailPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm() || !artwork) {
-      return;
-    }
-
+    if (!validateForm() || !artwork) return;
     setIsSubmitting(true);
-
     try {
-      // In a real app, you would submit this to your Supabase database
       console.log("Submitting bid:", {
         ...formData,
         artworkId: artwork.id,
         bidAmount: parseFloat(formData.bidAmount),
       });
-
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
-
       setSubmitSuccess(true);
-
-      // Auto-hide success message after 5 seconds
       setTimeout(() => setSubmitSuccess(false), 5000);
-
-      // Reset form after successful submission
       setFormData({
         name: "",
         email: "",
-        phone: "",
+        phone: "", // Clear only the number part
         bidAmount: (artwork.topBid + artwork.minimumIncrement).toString(),
       });
+      setErrors({});
     } catch (error) {
       console.error("Error submitting bid:", error);
-      alert("Failed to submit bid. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // --- LOADING STATE (UNCHANGED) ---
   if (!artwork) {
     return (
       <div
         style={{
           minHeight: "100vh",
-          background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)", // Monochromatic background
+          background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -242,7 +251,7 @@ export default function ArtworkDetailPage() {
             width: "200%",
             height: "200%",
             background:
-              "radial-gradient(circle at 30% 30%, rgba(100, 100, 100, 0.1), transparent 50%)", // Monochromatic effect
+              "radial-gradient(circle at 30% 30%, rgba(100, 100, 100, 0.1), transparent 50%)",
             animation: "rotate 20s linear infinite",
           }}
         />
@@ -251,7 +260,7 @@ export default function ArtworkDetailPage() {
             style={{
               width: "60px",
               height: "60px",
-              border: "3px solid rgba(100, 100, 100, 0.2)", // Monochromatic loader
+              border: "3px solid rgba(100, 100, 100, 0.2)",
               borderTopColor: "#ffffff",
               borderRadius: "50%",
               animation: "spin 0.8s linear infinite",
@@ -277,1076 +286,333 @@ export default function ArtworkDetailPage() {
     );
   }
 
+  // Calculate minimum required bid
   const minimumBid = artwork.topBid + artwork.minimumIncrement;
+  // Example bid increments based on minimumBid
+  const bidIncrements = [
+    minimumBid,
+    minimumBid + artwork.minimumIncrement,
+    minimumBid + artwork.minimumIncrement * 2,
+    minimumBid + artwork.minimumIncrement * 3,
+  ];
 
+  // Generate mock bid history
+  const mockBidHistory = generateMockBidHistory(
+    artwork.startingBid,
+    artwork.minimumIncrement
+  );
+
+  // --- RENDER (Updated to use artwork data and Indian Rupee symbol) ---
   return (
-    <div
-      style={{
-        background:
-          "linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)", // Monochromatic background
-        color: "#ffffff",
-        fontFamily:
-          '"Montserrat", -apple-system, BlinkMacSystemFont, sans-serif',
-        minHeight: "100vh",
-        position: "relative",
-      }}
-    >
+    <>
       <style>{`
-        /* Custom Font and Global Styles */
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&display=swap');
-        body { font-family: 'Montserrat', sans-serif !important; }
-
-        /* Animation Keyframes */
-        @keyframes pulse {
-          0% { opacity: 0.8; }
-          50% { opacity: 1; }
-          100% { opacity: 0.8; }
-        }
-        @keyframes float {
-          0% { transform: translate(0, 0); }
-          50% { transform: translate(10px, 10px); }
-          100% { transform: translate(0, 0); }
-        }
-        @keyframes gradient { /* This will be a subtle grayscale gradient now */
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Bid Form Input Styling */
-        .bid-input {
-          width: 100%;
-          padding: 16px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 12px;
-          color: white;
-          font-size: 16px;
-          transition: all 0.3s ease;
-          box-sizing: border-box;
-          margin-top: 5px;
-          font-family: 'Montserrat', sans-serif;
-        }
-
-        .bid-input:focus {
-          outline: none;
-          border-color: #ffffff; /* White focus border */
-          box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); /* White shadow */
-          background: rgba(255, 255, 255, 0.1);
-        }
-
-        .bid-label {
-          font-size: 14px;
-          color: rgba(255, 255, 255, 0.7);
-          font-weight: 500;
-          display: block;
-          margin-bottom: 5px;
-        }
-
-        .error-text {
-          color: #ff5555; /* A subtle red for error, still fits monochrome */
-          font-size: 12px;
-          margin-top: 5px;
-          height: 15px; /* Reserve space for error message */
+        /* --- STYLES TO MATCH THE TARGET UI --- */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #FFFFFF; color: #111827; margin: 0; }
+        .page-container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+        .main-grid { display: grid; grid-template-columns: 1fr; gap: 3rem; padding: 2rem 0; }
+        @media (min-width: 1024px) { .main-grid { grid-template-columns: 1fr 0.8fr; } }
+        .left-column, .right-column { display: flex; flex-direction: column; gap: 1.5rem; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #E5E7EB; }
+        .header-logo { font-weight: 700; font-size: 1.5rem; letter-spacing: 2px; }
+        .header-nav { display: none; gap: 1.5rem; }
+        @media (min-width: 768px) { .header-nav { display: flex; } }
+        .header-nav a { text-decoration: none; color: #4B5563; }
+        .header-icons { display: flex; gap: 1rem; }
+        
+        .artwork-image-main { width: 100%; height: auto; object-fit: cover; border: 1px solid #E5E7EB; cursor: zoom-in; }
+        .artwork-description { color: #374151; line-height: 1.6; }
+        
+        .artwork-info { display: flex; flex-direction: column; gap: 0.5rem; }
+        .info-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .lot-number { font-size: 1.25rem; font-weight: 600; }
+        .artist-name { font-size: 1.25rem; font-weight: 600; color: #374151; } /* Smaller, less prominent font for artist */
+        .artwork-title { font-size: 1.5rem; font-weight: 700; color: #004276; /* Larger, bold, and colored */ display: inline-block; /* Required for animation */ animation: shimmer 2s infinite linear; }
+        .auction-details { border: 1px solid #E5E7EB; border-radius: 8px; }
+        .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 1rem; }
+        .detail-row:not(:last-child) { border-bottom: 1px solid #E5E7EB; }
+        .detail-label { color: #4B5563; }
+        .detail-value { font-weight: 600; }
+        .current-bid-value { color: #004276; }
+        .met-status { padding: 1rem; color: #004276; font-weight: 600; font-size: 0.875rem; border-top: 1px solid #E5E7EB; }
+        
+        .bid-form-section { display: flex; flex-direction: column; gap: 1.5rem; }
+        .bid-increments { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+         @media (min-width: 480px) { .bid-increments { grid-template-columns: repeat(4, 1fr); } }
+        .bid-increment-btn { padding: 0.75rem; border-radius: 4px; border: 1px solid #D1D5DB; background-color: #FFFFFF; cursor: pointer; font-weight: 500; text-align: center; }
+        .bid-increment-btn.active { background-color: #111827; color: #FFFFFF; border-color: #111827; }
+        
+        .form-inputs-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        @media (min-width: 640px) { .form-inputs-grid { grid-template-columns: 1fr 1fr; } }
+        .form-field { display: flex; flex-direction: column; }
+        .form-label { font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem; }
+        .form-input { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #D1D5DB; border-radius: 4px; box-sizing: border-box; font-size: 1rem; }
+        .error-text { color: #EF4444; font-size: 0.75rem; margin-top: 0.25rem; height: 1em; }
+        
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        .place-bid-btn, .set-max-bid-btn { padding: 0.875rem; border-radius: 4px; font-weight: 600; font-size: 1rem; cursor: pointer; }
+        .place-bid-btn { background-color: #F3F4F6; border: 1px solid #D1D5DB; color: #111827; }
+        .set-max-bid-btn { background-color: #111827; border: 1px solid #111827; color: #FFFFFF; }
+        
+        .bid-history { border-top: 1px solid #E5E7EB; padding-top: 1.5rem; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        
+        .loading-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #f8f9fa; color: #333; }
+        .spinner { width: 50px; height: 50px; border: 3px solid rgba(0,0,0,0.1); border-top-color: #111; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .zoom-modal { position: fixed; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.9); display: flex; align-items: center; justify-content: center; cursor: zoom-out; }
+        .zoom-modal img { max-width: 90%; max-height: 90%; object-fit: contain; }
+        /* Shimmer animation */
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
         }
       `}</style>
 
-      {/* Animated background */}
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background:
-            "radial-gradient(circle at 20% 50%, rgba(100, 100, 100, 0.08), transparent 50%), radial-gradient(circle at 80% 50%, rgba(150, 150, 150, 0.08), transparent 50%)", // Monochromatic particles
-          pointerEvents: "none",
-          animation: "pulse 10s ease-in-out infinite",
-        }}
-      />
-
-      {/* Full-Screen Image Zoom Modal */}
       {imageZoom && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 9999,
-            background: "rgba(0, 0, 0, 0.95)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transition: "opacity 0.3s ease",
-            cursor: "zoom-out",
-          }}
-          onClick={() => setImageZoom(false)}
-        >
+        <div className="zoom-modal" onClick={() => setImageZoom(false)}>
           <img
-            src={activeImage === "main" ? artwork.image : artwork.coverImage}
+            src={artwork.image} // Use the main image from JSON
             alt={artwork.title}
-            style={{
-              maxWidth: "90%",
-              maxHeight: "90%",
-              objectFit: "contain",
-              borderRadius: "4px",
-              boxShadow: "0 0 40px rgba(255, 255, 255, 0.2)", // Subtle white shadow
-              transform: "scale(1)",
-              transition: "transform 0.3s ease",
-              filter: "grayscale(100%)", // Make images grayscale
-            }}
           />
-          <button
-            style={{
-              position: "absolute",
-              top: "40px",
-              right: "40px",
-              background: "rgba(255, 255, 255, 0.1)",
-              border: "none",
-              borderRadius: "50%",
-              width: "40px",
-              height: "40px",
-              color: "white",
-              fontSize: "20px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backdropFilter: "blur(10px)",
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              setImageZoom(false);
-            }}
-          >
-            &times;
-          </button>
         </div>
       )}
 
-      {/* Header */}
-      <header
-        style={{
-          padding: "20px 40px",
-          position: "sticky",
-          top: 0,
-          zIndex: 1000,
-          background: "rgba(10, 10, 10, 0.7)",
-          backdropFilter: "blur(20px) saturate(180%)",
-          WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1400px",
-            margin: "0 auto",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "28px",
-              fontWeight: "900",
-              letterSpacing: "1px",
-              background:
-                "linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 50%, #ffffff 100%)", // Monochromatic gradient for logo
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundSize: "200% 200%",
-              animation: "gradient 3s ease infinite",
-              cursor: "pointer",
-            }}
-            onClick={() => router.push("/")}
-          >
-            The Doon Art Auctions
+      <div className="page-container">
+        <header className="header">
+          <div className="header-logo">Palettes of Promise</div>{" "}
+          {/* Updated logo text */}
+          <nav className="header-nav">
+            {/* Removed Auctions, Buy & Selling, Private sales */}
+          </nav>
+          <div className="header-icons">
+            {/* Removed search icon */}
+            <button onClick={() => router.push("/")}>Back to Gallery</button>
           </div>
+        </header>
+        {/* Removed breadcrumbs line */}
+      </div>
 
-          <button
-            style={{
-              padding: "10px 24px",
-              background:
-                "linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(200, 200, 200, 0.1))", // Monochromatic button background
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              borderRadius: "100px",
-              color: "white",
-              cursor: "pointer",
-              fontWeight: "600",
-              fontSize: "14px",
-              transition: "all 0.3s ease",
-              backdropFilter: "blur(10px)",
-              WebkitBackdropFilter: "blur(10px)",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-            onClick={() => router.push("/")}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background =
-                "linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(200, 200, 200, 0.2))";
-              e.currentTarget.style.transform = "translateX(-4px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background =
-                "linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(200, 200, 200, 0.1))";
-              e.currentTarget.style.transform = "translateX(0)";
-            }}
-          >
-            <svg
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            BACK TO GALLERY
-          </button>
-        </div>
-      </header>
-
-      <main
-        style={{
-          maxWidth: "1400px",
-          margin: "0 auto",
-          padding: "40px",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {/* Hero Section */}
-        <div
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(200, 200, 200, 0.03))", // Monochromatic background
-            borderRadius: "32px",
-            padding: "48px",
-            marginBottom: "48px",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              top: "-100px",
-              right: "-100px",
-              width: "300px",
-              height: "300px",
-              borderRadius: "50%",
-              background:
-                "radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent 70%)", // Monochromatic light source
-              animation: "float 6s ease-in-out infinite",
-            }}
-          />
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              marginBottom: "40px",
-              position: "relative",
-              zIndex: 1,
-            }}
-          >
-            <div>
-              <h1
-                style={{
-                  fontSize: "clamp(32px, 4vw, 48px)",
-                  fontWeight: "900",
-                  marginBottom: "12px",
-                  letterSpacing: "-1px",
-                  background:
-                    "linear-gradient(135deg, #ffffff, rgba(255, 255, 255, 0.9))",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                {artwork.title}
-              </h1>
-              <p
-                style={{
-                  fontSize: "20px",
-                  color: "rgba(255, 255, 255, 0.7)",
-                  fontWeight: "500",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                by
-                <span
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #ffffff, rgba(255, 255, 255, 0.7))", // Monochromatic for artist name
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    fontWeight: "700",
-                  }}
-                >
-                  {artwork.artist}
-                </span>
+      <main className="page-container">
+        <div className="main-grid">
+          <div className="left-column">
+            <img
+              src={artwork.image} // Use the main image from JSON
+              alt={artwork.title}
+              className="artwork-image-main"
+              onClick={() => setImageZoom(true)}
+            />
+            <div className="artwork-description">
+              {/* Assuming description is not in your JSON, using a placeholder or artist info */}
+              <p>
+                {artwork.artist} - {artwork.medium} - {artwork.dimensions}
               </p>
-            </div>
-            <div
-              style={{
-                background: "linear-gradient(135deg, #ffffff, #cccccc)", // Monochromatic lot number tag
-                padding: "10px 24px",
-                borderRadius: "100px",
-                fontSize: "14px",
-                fontWeight: "700",
-                letterSpacing: "1px",
-                boxShadow: "0 8px 24px rgba(255, 255, 255, 0.1)", // Subtle shadow
-                color: "#333", // Dark text for contrast
-              }}
-            >
-              {artwork.lotNumber}
+              {/* Add a description field to your JSON if needed */}
             </div>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1.5fr 1fr",
-              gap: "32px",
-              position: "relative",
-              zIndex: 1,
-            }}
-          >
-            {/* Images Section */}
-            <div>
-              <div
-                style={{
-                  borderRadius: "24px",
-                  overflow: "hidden",
-                  boxShadow: "0 20px 60px rgba(0, 0, 0, 0.4)",
-                  marginBottom: "20px",
-                  position: "relative",
-                  cursor: "zoom-in",
-                  background:
-                    "linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(200, 200, 200, 0.1))", // Monochromatic placeholder
-                }}
-                onClick={() => setImageZoom(true)}
-              >
-                <img
-                  src={
-                    activeImage === "main" ? artwork.image : artwork.coverImage
-                  }
-                  alt={artwork.title}
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    display: "block",
-                    transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-                    transform: imageZoom ? "scale(1.05)" : "scale(1)",
-                    filter: "grayscale(100%)", // Make main image grayscale
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "scale(1.05)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "scale(1)";
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "20px",
-                    right: "20px",
-                    background: "rgba(10, 10, 10, 0.8)",
-                    backdropFilter: "blur(10px)",
-                    WebkitBackdropFilter: "blur(10px)",
-                    padding: "8px 16px",
-                    borderRadius: "100px",
-                    fontSize: "13px",
-                    fontWeight: "600",
-                    color: "rgba(255, 255, 255, 0.8)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  }}
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                  Click to zoom
-                </div>
+          <div className="right-column">
+            <div className="artwork-info">
+              <div className="info-header">
+                <div className="lot-number">{artwork.lotNumber}</div>
               </div>
-
-              {/* Thumbnail Gallery */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "16px",
-                }}
-              >
-                <div
-                  style={{
-                    borderRadius: "16px",
-                    overflow: "hidden",
-                    height: "120px",
-                    cursor: "pointer",
-                    border:
-                      activeImage === "main"
-                        ? "2px solid #ffffff" // White border for active
-                        : "2px solid transparent",
-                    transition: "all 0.3s ease",
-                    boxShadow:
-                      activeImage === "main"
-                        ? "0 0 10px rgba(255, 255, 255, 0.5)"
-                        : "none",
-                  }}
-                  onClick={() => setActiveImage("main")}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "scale(1.05)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "scale(1)";
-                  }}
-                >
-                  <img
-                    src={artwork.image}
-                    alt="Main view"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      filter: "grayscale(100%)", // Make thumbnail grayscale
-                    }}
-                  />
-                </div>
-                <div
-                  style={{
-                    borderRadius: "16px",
-                    overflow: "hidden",
-                    height: "120px",
-                    cursor: "pointer",
-                    border:
-                      activeImage === "cover"
-                        ? "2px solid #ffffff" // White border for active
-                        : "2px solid transparent",
-                    transition: "all 0.3s ease",
-                    boxShadow:
-                      activeImage === "cover"
-                        ? "0 0 10px rgba(255, 255, 255, 0.5)"
-                        : "none",
-                  }}
-                  onClick={() => setActiveImage("cover")}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "scale(1.05)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "scale(1)";
-                  }}
-                >
-                  <img
-                    src={artwork.coverImage}
-                    alt="Cover view"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      filter: "grayscale(100%)", // Make thumbnail grayscale
-                    }}
-                  />
-                </div>
-              </div>
+              {/* Order changed: Title first, then Artist */}
+              <h2 className="artwork-title">{artwork.title}</h2>{" "}
+              {/* Shimmering title */}
+              <h1 className="artist-name">{artwork.artist}</h1>{" "}
+              {/* Smaller, less prominent */}
             </div>
 
-            {/* Bidding Info Cards */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "20px",
-              }}
+            <div className="auction-details">
+              <div className="detail-row">
+                <span className="detail-label">Auction closes</span>
+                <span className="detail-value">Dec. 4 at 6:30 PM</span>{" "}
+                {/* Placeholder */}
+              </div>
+              {/* Changed label from "Current bid" to "Starting bid" */}
+              <div className="detail-row">
+                <span className="detail-label">Starting bid</span>
+                <span className="detail-value current-bid-value">
+                  ₹{artwork.startingBid.toLocaleString()}{" "}
+                  {/* Use Rupee symbol */}
+                </span>
+              </div>
+              {/* Changed label from "Estimate" to "Minimum Increment" */}
+              <div className="detail-row">
+                <span className="detail-label">Minimum Increment</span>
+                <span className="detail-value">
+                  ₹{artwork.minimumIncrement.toLocaleString()}{" "}
+                  {/* Use Rupee symbol */}
+                </span>
+              </div>
+              {/* Added new row for Starting Bid + Minimum Increment */}
+              <div className="detail-row">
+                <span className="detail-label">Next Minimum Bid</span>
+                <span className="detail-value">
+                  ₹
+                  {(
+                    artwork.startingBid + artwork.minimumIncrement
+                  ).toLocaleString()}{" "}
+                  {/* Use Rupee symbol */}
+                </span>
+              </div>
+              <div className="met-status">Accepted minimum price is met</div>{" "}
+              {/* Placeholder */}
+            </div>
+
+            <form
+              onSubmit={handleSubmit}
+              className="bid-form-section"
+              noValidate
             >
-              {/* Current Bid Card */}
-              <div
-                style={{
-                  background: "linear-gradient(135deg, #444444, #666666)", // Dark gray gradient
-                  borderRadius: "24px",
-                  padding: "32px",
-                  position: "relative",
-                  overflow: "hidden",
-                  boxShadow: "0 20px 40px rgba(0, 0, 0, 0.3)",
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "-50px",
-                    right: "-50px",
-                    width: "150px",
-                    height: "150px",
-                    borderRadius: "50%",
-                    background: "rgba(255, 255, 255, 0.1)",
-                  }}
-                />
-                <div style={{ position: "relative", zIndex: 1 }}>
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      opacity: 0.9,
-                      marginBottom: "8px",
-                      letterSpacing: "1px",
-                      textTransform: "uppercase",
-                      color: "#eee",
-                    }}
+              <div className="bid-increments">
+                {bidIncrements.map((amount) => (
+                  <button
+                    type="button"
+                    key={amount}
+                    className={`bid-increment-btn ${
+                      formData.bidAmount === amount.toString() ? "active" : ""
+                    }`}
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        bidAmount: amount.toString(),
+                      }))
+                    }
                   >
-                    Current Top Bid
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "42px",
-                      fontWeight: "900",
-                      marginBottom: "20px",
-                      textShadow: "0 4px 20px rgba(0, 0, 0, 0.2)",
-                    }}
-                  >
-                    ${artwork.topBid.toLocaleString()}
-                  </div>
-                  <div
-                    style={{
-                      padding: "12px 20px",
-                      background: "rgba(255, 255, 255, 0.2)",
-                      borderRadius: "12px",
-                      backdropFilter: "blur(10px)",
-                      WebkitBackdropFilter: "blur(10px)",
-                    }}
-                  >
-                    <div
+                    ₹{amount.toLocaleString()} {/* Use Rupee symbol */}
+                  </button>
+                ))}
+              </div>
+              <div className="form-inputs-grid">
+                <div className="form-field">
+                  <label htmlFor="name" className="form-label">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    placeholder="John Doe"
+                  />
+                  <div className="error-text">{errors.name}</div>
+                </div>
+                <div className="form-field">
+                  <label htmlFor="email" className="form-label">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    placeholder="john.doe@example.com"
+                  />
+                  <div className="error-text">{errors.email}</div>
+                </div>
+                <div className="form-field">
+                  <label htmlFor="phone" className="form-label">
+                    Phone
+                  </label>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <span
                       style={{
-                        fontSize: "12px",
-                        opacity: 0.9,
-                        marginBottom: "4px",
+                        padding: "0.6rem 0.5rem",
+                        border: "1px solid #D1D5DB",
+                        borderRight: "none",
+                        borderRadius: "4px 0 0 4px",
+                        backgroundColor: "#F3F4F6",
+                        color: "#6B7280",
                       }}
                     >
-                      Minimum next bid
-                    </div>
-                    <div style={{ fontSize: "20px", fontWeight: "700" }}>
-                      ${minimumBid.toLocaleString()}
-                    </div>
+                      +91 {/* Static prefix */}
+                    </span>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone} // Only the 10-digit number
+                      onChange={handleInputChange}
+                      className="form-input"
+                      placeholder="9876543210" // Placeholder for the number part only
+                      style={{
+                        borderRadius: "0 4px 4px 0",
+                        borderLeft: "none",
+                      }} // Adjust border radius
+                      inputMode="numeric" // Hint for numeric keyboard on mobile
+                      pattern="[0-9]{10}" // HTML5 validation pattern (not strictly enforced by all browsers)
+                    />
                   </div>
+                  <div className="error-text">{errors.phone}</div>
+                </div>
+                <div className="form-field">
+                  <label htmlFor="bidAmount" className="form-label">
+                    Your Bid
+                  </label>
+                  <input
+                    type="number"
+                    id="bidAmount"
+                    name="bidAmount"
+                    value={formData.bidAmount}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    min={minimumBid} // HTML5 min validation
+                  />
+                  <div className="error-text">{errors.bidAmount}</div>
                 </div>
               </div>
-
-              {/* Bid Details */}
-              <div
-                style={{
-                  background: "rgba(255, 255, 255, 0.05)",
-                  borderRadius: "24px",
-                  padding: "24px",
-                  backdropFilter: "blur(10px)",
-                  WebkitBackdropFilter: "blur(10px)",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                }}
-              >
-                <div style={{ marginBottom: "20px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "12px 0",
-                      borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-                    }}
-                  >
-                    <span
-                      style={{
-                        color: "rgba(255, 255, 255, 0.6)",
-                        fontSize: "14px",
-                      }}
-                    >
-                      Starting Bid
-                    </span>
-                    <span style={{ fontSize: "18px", fontWeight: "700" }}>
-                      ${artwork.startingBid.toLocaleString()}
-                    </span>
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "12px 0",
-                    }}
-                  >
-                    <span
-                      style={{
-                        color: "rgba(255, 255, 255, 0.6)",
-                        fontSize: "14px",
-                      }}
-                    >
-                      Bid Increment
-                    </span>
-                    <span style={{ fontSize: "18px", fontWeight: "700" }}>
-                      +${artwork.minimumIncrement}
-                    </span>
-                  </div>
-                </div>
-
+              <div className="action-buttons">
                 <button
-                  style={{
-                    width: "100%",
-                    padding: "14px",
-                    background:
-                      "linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(200, 200, 200, 0.2))", // Monochromatic button
-                    border: "1px solid rgba(255, 255, 255, 0.3)",
-                    borderRadius: "16px",
-                    color: "white",
-                    fontWeight: "600",
-                    fontSize: "15px",
-                    cursor: "pointer",
-                    transition: "all 0.3s ease",
-                  }}
-                  onClick={() => {
-                    document
-                      .getElementById("bid-form")
-                      ?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background =
-                      "linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(200, 200, 200, 0.3))";
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background =
-                      "linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(200, 200, 200, 0.2))";
-                    e.currentTarget.style.transform = "translateY(0)";
-                  }}
+                  type="submit"
+                  className="place-bid-btn"
+                  disabled={isSubmitting}
                 >
-                  PLACE A BID →
+                  {isSubmitting ? "Placing..." : "Place bid"}
+                </button>
+                <button
+                  type="submit"
+                  className="set-max-bid-btn"
+                  disabled={isSubmitting}
+                >
+                  Set max bid
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
+              {submitSuccess && (
+                <p style={{ color: "#004276", textAlign: "center" }}>
+                  Bid placed successfully!
+                </p>
+              )}
+            </form>
 
-        {/* Details Grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1fr",
-            gap: "32px",
-            marginBottom: "48px",
-          }}
-        >
-          {/* Description Card */}
-          <div
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.05))",
-              borderRadius: "24px",
-              padding: "40px",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-              backdropFilter: "blur(10px)",
-              WebkitBackdropFilter: "blur(10px)",
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "28px",
-                fontWeight: "800",
-                marginBottom: "24px",
-                background:
-                  "linear-gradient(135deg, #ffffff, rgba(255, 255, 255, 0.8))", // Monochromatic gradient for heading
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-              }}
-            >
-              <svg
-                width="24"
-                height="24"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
-              </svg>
-              Description
-            </h2>
-            <p
-              style={{
-                fontSize: "17px",
-                lineHeight: "1.8",
-                color: "rgba(255, 255, 255, 0.8)",
-              }}
-            >
-              {artwork.description}
-            </p>
-          </div>
-
-          {/* Technical Specs Card */}
-          <div
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(200, 200, 200, 0.08))", // Monochromatic background
-              borderRadius: "24px",
-              padding: "40px",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "24px",
-                fontWeight: "800",
-                marginBottom: "32px",
-                color: "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-              }}
-            >
-              <svg
-                width="20"
-                height="20"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-              Specifications
-            </h2>
-
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "24px" }}
-            >
-              {[
-                { label: "Medium", value: artwork.medium, icon: "🎨" },
-                { label: "Dimensions", value: artwork.dimensions, icon: "📐" },
-                { label: "Artist", value: artwork.artist, icon: "👤" },
-                { label: "Lot Number", value: artwork.lotNumber, icon: "🏷️" },
-              ].map((spec, index) => (
+            <div className="bid-history">
+              <div className="history-header">
+                <span>Bid history</span>
+                <span>See all</span>
+              </div>
+              {mockBidHistory.map((bid) => (
                 <div
-                  key={index}
+                  key={bid.id}
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "16px",
-                    background: "rgba(255, 255, 255, 0.03)",
-                    borderRadius: "12px",
-                    transition: "all 0.3s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background =
-                      "rgba(255, 255, 255, 0.06)";
-                    e.currentTarget.style.transform = "translateX(4px)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background =
-                      "rgba(255, 255, 255, 0.03)";
-                    e.currentTarget.style.transform = "translateX(0)";
+                    padding: "0.25rem 0",
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                    }}
-                  >
-                    <span style={{ fontSize: "20px" }}>{spec.icon}</span>
-                    <span
-                      style={{
-                        color: "rgba(255, 255, 255, 0.6)",
-                        fontSize: "14px",
-                      }}
-                    >
-                      {spec.label}
-                    </span>
-                  </div>
-                  <span style={{ fontSize: "16px", fontWeight: "600" }}>
-                    {spec.value}
-                  </span>
+                  <span>₹{bid.bid.toLocaleString()}</span>{" "}
+                  {/* Use Rupee symbol */}
+                  <span style={{ color: "#6B7280" }}>{bid.time}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
-
-        {/* Bid Form Section */}
-        <div
-          id="bid-form"
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(200, 200, 200, 0.05))", // Monochromatic background
-            borderRadius: "32px",
-            padding: "48px",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              top: "-150px",
-              left: "-150px",
-              width: "400px",
-              height: "400px",
-              borderRadius: "50%",
-              background:
-                "radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent 70%)", // Monochromatic light source
-              animation: "float 8s ease-in-out infinite",
-            }}
-          />
-
-          <h2
-            style={{
-              fontSize: "36px",
-              fontWeight: "900",
-              marginBottom: "16px",
-              textAlign: "center",
-              background:
-                "linear-gradient(135deg, #ffffff, rgba(255, 255, 255, 0.9))",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              letterSpacing: "-1px",
-            }}
-          >
-            Place Your Bid
-          </h2>
-          <p
-            style={{
-              textAlign: "center",
-              color: "rgba(255, 255, 255, 0.6)",
-              marginBottom: "40px",
-              fontSize: "16px",
-            }}
-          >
-            Your bid must be at least **${minimumBid.toLocaleString()}** to be
-            valid.
-          </p>
-
-          <form
-            onSubmit={handleSubmit}
-            style={{ maxWidth: "600px", margin: "0 auto" }}
-          >
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "20px",
-                marginBottom: "20px",
-              }}
-            >
-              {/* Name Input */}
-              <div>
-                <label htmlFor="name" className="bid-label">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="bid-input"
-                  placeholder="John Doe"
-                />
-                <div className="error-text">{errors.name}</div>
-              </div>
-
-              {/* Email Input */}
-              <div>
-                <label htmlFor="email" className="bid-label">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="bid-input"
-                  placeholder="john.doe@example.com"
-                />
-                <div className="error-text">{errors.email}</div>
-              </div>
-
-              {/* Phone Input */}
-              <div>
-                <label htmlFor="phone" className="bid-label">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="bid-input"
-                  placeholder="+1 (555) 123-4567"
-                />
-                <div className="error-text">{errors.phone}</div>
-              </div>
-
-              {/* Bid Amount Input */}
-              <div>
-                <label htmlFor="bidAmount" className="bid-label">
-                  Your Bid Amount (USD)
-                </label>
-                <input
-                  type="number"
-                  id="bidAmount"
-                  name="bidAmount"
-                  value={formData.bidAmount}
-                  onChange={handleInputChange}
-                  className="bid-input"
-                  placeholder={minimumBid.toString()}
-                  min={minimumBid}
-                />
-                <div className="error-text">{errors.bidAmount}</div>
-              </div>
-            </div>
-
-            {/* Submission Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              style={{
-                width: "100%",
-                padding: "16px",
-                background: isSubmitting
-                  ? "#666666" // Darker gray when submitting
-                  : "linear-gradient(90deg, #bbbbbb 0%, #dddddd 100%)", // Light gray gradient
-                border: "none",
-                borderRadius: "16px",
-                color: isSubmitting ? "#cccccc" : "#333333", // Dark text for contrast
-                fontWeight: "700",
-                fontSize: "18px",
-                cursor: isSubmitting ? "not-allowed" : "pointer",
-                transition: "all 0.3s ease",
-                boxShadow: isSubmitting
-                  ? "none"
-                  : "0 10px 30px rgba(255, 255, 255, 0.1)", // Subtle white shadow
-                marginTop: "10px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "10px",
-              }}
-              onMouseEnter={(e) => {
-                if (!isSubmitting) {
-                  e.currentTarget.style.boxShadow =
-                    "0 15px 40px rgba(255, 255, 255, 0.2)";
-                  e.currentTarget.style.transform = "translateY(-3px)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isSubmitting) {
-                  e.currentTarget.style.boxShadow =
-                    "0 10px 30px rgba(255, 255, 255, 0.1)";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }
-              }}
-            >
-              {isSubmitting ? (
-                <>
-                  <div
-                    style={{
-                      width: "20px",
-                      height: "20px",
-                      border: "2px solid rgba(255, 255, 255, 0.5)",
-                      borderTopColor: "white",
-                      borderRadius: "50%",
-                      animation: "spin 0.8s linear infinite",
-                    }}
-                  />
-                  SUBMITTING BID...
-                </>
-              ) : (
-                "CONFIRM BID"
-              )}
-            </button>
-
-            {/* Success Message */}
-            {submitSuccess && (
-              <div
-                style={{
-                  marginTop: "20px",
-                  padding: "15px",
-                  background: "rgba(100, 200, 100, 0.1)", // Subtle green for success
-                  border: "1px solid #77bb77",
-                  borderRadius: "12px",
-                  color: "#77bb77",
-                  textAlign: "center",
-                  fontWeight: "600",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                }}
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                Bid submitted successfully! Thank you.
-              </div>
-            )}
-          </form>
-        </div>
       </main>
-
-      {/* Footer (Simplified) */}
-      <footer
-        style={{
-          padding: "40px 40px",
-          textAlign: "center",
-          borderTop: "1px solid rgba(255, 255, 255, 0.08)",
-          marginTop: "40px",
-          color: "rgba(255, 255, 255, 0.5)",
-          fontSize: "14px",
-        }}
-      >
-        © {new Date().getFullYear()} The Doon ART AUCTIONS. All Rights Reserved.
-      </footer>
-    </div>
+    </>
   );
 }

@@ -1,20 +1,23 @@
-// src/app/login/page.tsx
 "use client";
+
+import { useState } from "react";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase-client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const router = useRouter();
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage(null); // Clear previous errors
 
+    // NOTE: This uses the stub above in this environment. In your environment, it correctly calls the actual client.
     const supabase = createSupabaseBrowserClient();
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -22,14 +25,18 @@ export default function LoginPage() {
     });
 
     if (error) {
-      alert("Login failed: " + error.message);
+      // Show UI error message (avoiding alert())
+      setErrorMessage("Authentication failed: Check your email and password.");
+      console.error("Login failed:", error.message);
       setLoading(false);
       return;
     }
 
-    // ✅ Instead of router.refresh() + push, do a full page reload to /admin/dashboard
-    // This ensures the server sees the new cookie on the initial request
-    window.location.href = "/admin/dashboard";
+    setLoading(false);
+
+    // ✅ CORE FIX REMAINS: Forces a full page reload. This is the required pattern
+    // for Next.js Server Component (SC) protection to work with Supabase cookies.
+    window.location.assign("/admin/dashboard");
   };
 
   return (
@@ -37,6 +44,7 @@ export default function LoginPage() {
       style={{
         minHeight: "100vh",
         backgroundColor: "#000",
+        fontFamily: "Inter, sans-serif",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -49,7 +57,7 @@ export default function LoginPage() {
           borderRadius: "24px",
           boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
           width: "100%",
-          maxWidth: "1200px",
+          maxWidth: "1000px",
           display: "flex",
           overflow: "hidden",
         }}
@@ -58,7 +66,7 @@ export default function LoginPage() {
         <div
           style={{
             width: "50%",
-            height: "600px",
+            minHeight: "550px",
             position: "relative",
             display: "flex",
             flexDirection: "column",
@@ -66,6 +74,7 @@ export default function LoginPage() {
             padding: "40px",
             background: "linear-gradient(135deg, #4c1d95, #ec4899, #3b82f6)",
           }}
+          className="hidden md:flex"
         >
           <div>
             <div
@@ -98,7 +107,7 @@ export default function LoginPage() {
             <h1
               style={{
                 color: "#fff",
-                fontSize: "48px",
+                fontSize: "42px",
                 fontWeight: "700",
                 lineHeight: "1.2",
                 marginBottom: "24px",
@@ -131,14 +140,16 @@ export default function LoginPage() {
         {/* Right side - Login form */}
         <div
           style={{
-            width: "50%",
-            height: "600px",
+            width: "100%",
+            height: "100%",
+            minHeight: "550px",
             padding: "40px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
             boxSizing: "border-box",
           }}
+          className="md:w-1/2"
         >
           <div
             style={{
@@ -151,7 +162,7 @@ export default function LoginPage() {
               style={{
                 width: "48px",
                 height: "48px",
-                backgroundColor: "#e5e7eb",
+                backgroundColor: "#f3f4f6",
                 borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
@@ -164,7 +175,7 @@ export default function LoginPage() {
                 height="24"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#6b7280"
+                stroke="#4b5563"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -184,7 +195,7 @@ export default function LoginPage() {
           >
             <h2
               style={{
-                fontSize: "32px",
+                fontSize: "28px",
                 fontWeight: "700",
                 color: "#1f2937",
                 marginBottom: "8px",
@@ -201,6 +212,25 @@ export default function LoginPage() {
               Enter your email and password to access your account
             </p>
           </div>
+
+          {/* Error Message Display */}
+          {errorMessage && (
+            <div
+              style={{
+                backgroundColor: "#fee2e2",
+                color: "#991b1b",
+                padding: "12px",
+                borderRadius: "8px",
+                marginBottom: "20px",
+                fontSize: "14px",
+                fontWeight: "500",
+                textAlign: "center",
+                border: "1px solid #fca5a5",
+              }}
+            >
+              {errorMessage}
+            </div>
+          )}
 
           <form
             onSubmit={handleLogin}
@@ -279,6 +309,7 @@ export default function LoginPage() {
                 />
                 <button
                   type="button"
+                  aria-label="Toggle password visibility"
                   style={{
                     position: "absolute",
                     right: "12px",
@@ -312,15 +343,19 @@ export default function LoginPage() {
               style={{
                 width: "100%",
                 padding: "12px 24px",
-                backgroundColor: loading ? "#9ca3af" : "#000",
+                backgroundColor: loading ? "#9ca3af" : "#1f2937",
                 color: "#fff",
                 border: "none",
                 borderRadius: "8px",
                 fontSize: "16px",
-                fontWeight: "500",
+                fontWeight: "600",
                 cursor: loading ? "not-allowed" : "pointer",
                 transition: "background-color 0.2s ease",
+                boxShadow: loading
+                  ? "none"
+                  : "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
               }}
+              className="hover:bg-gray-700"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>

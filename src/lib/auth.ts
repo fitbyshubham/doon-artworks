@@ -3,10 +3,14 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function requireAdmin() {
-  const cookieStore = await cookies();
+/**
+ * Creates a Supabase server client with async cookie support (Next.js 15).
+ * Must be called inside a Server Component or Server Action.
+ */
+export async function createSupabaseServerClient() {
+  const cookieStore = await cookies(); // ✅ Required in Next.js 15
 
-  const supabase = createServerClient(
+  return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -30,8 +34,15 @@ export async function requireAdmin() {
       },
     }
   );
+}
 
-  // ✅ SAFE: No nested destructuring
+/**
+ * Ensures the current user is authenticated and has the 'admin' role.
+ * Redirects to /login if not authorized.
+ */
+export async function requireAdmin() {
+  const supabase = await createSupabaseServerClient();
+
   const userResponse = await supabase.auth.getUser();
   const user = userResponse.data?.user;
   const authError = userResponse.error;
