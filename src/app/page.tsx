@@ -499,7 +499,7 @@ export default function HomePage() {
                   (e.currentTarget.style.background = "white")
                 }
               >
-                VIEW LOTS
+                MAKE A PLEDGE
               </button>
             </div>
           </div>
@@ -606,7 +606,7 @@ export default function HomePage() {
                   (e.currentTarget.style.background = "white")
                 }
               >
-                VIEW LOTS
+                MAKE A PLEDGE
               </button>
             </div>
           </div>
