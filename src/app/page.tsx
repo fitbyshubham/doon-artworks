@@ -22,31 +22,10 @@ interface Artwork {
   minimumIncrement: number;
   page: number;
   image: string;
+  // Add the 'weight' property as optional if it exists in the JSON but is sometimes undefined
+  weight?: string; // Or whatever the correct type is, if it can be undefined
+  // Add other potentially optional properties from your JSON here if necessary
 }
-
-// Custom styles object for the social media icons
-const socialIcons = {
-  f: (
-    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M14 10h-2V9c0-.46.34-.73.74-.73h1.68V6.15A20.35 20.35 0 0 0 12.87 6c-2.3 0-3.87 1.28-3.87 4.07v1.86h-2V14h2v7h3v-7h2l1-3z" />
-    </svg>
-  ),
-  t: (
-    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M22.46 6a8.55 8.55 0 0 1-2.48.68A4.27 4.27 0 0 0 21.6 4.75a8.7 8.7 0 0 1-2.73 1.05A4.3 4.3 0 0 0 15 4a4.28 4.28 0 0 0-4.3 4.3A12.23 12.23 0 0 0 3 5.4a4.28 4.28 0 0 0 1.32 5.73 4.19 4.19 0 0 1-1.95-.54v.05A4.29 4.29 0 0 0 8.05 15a4.34 4.34 0 0 1-2.14.08 4.29 4.29 0 0 0 4 2.98A8.6 8.6 0 0 1 3 18.23a12.23 12.23 0 0 0 6.64 1.95c8 0 12.38-6.6 12.38-12.38 0-.2.01-.4.01-.6a8.8 8.8 0 0 0 2.22-2.3z" />
-    </svg>
-  ),
-  in: (
-    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M2.03 21h3.48V9.38H2.03V21zM3.77 7.9c1.23 0 2.15-.92 2.15-2.07C5.92 4.67 5 3.75 3.77 3.75 2.54 3.75 1.62 4.67 1.62 5.83c0 1.15.92 2.07 2.15 2.07zM22 21h-3.47v-5.61c0-1.33-.49-2.24-1.66-2.24-.91 0-1.46.61-1.71 1.2V21H11.6V9.38h3.46v1.54h.04c.54-.92 1.87-1.89 3.86-1.89 4.13 0 4.88 2.7 4.88 6.22V21z" />
-    </svg>
-  ),
-  behance: (
-    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
-    </svg>
-  ),
-};
 
 export default function HomePage() {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
@@ -54,9 +33,9 @@ export default function HomePage() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
-
   useEffect(() => {
-    setArtworks(artworkData);
+    // 🔸 Type assertion to ensure compatibility
+    setArtworks(artworkData as Artwork[]);
     const timer = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(timer);
   }, []);
