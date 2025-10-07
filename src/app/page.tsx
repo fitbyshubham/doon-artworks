@@ -499,7 +499,7 @@ export default function HomePage() {
                   (e.currentTarget.style.background = "white")
                 }
               >
-                MAKE A PLEDGE
+                MAKE YOUR PLEDGE
               </button>
             </div>
           </div>
@@ -606,7 +606,7 @@ export default function HomePage() {
                   (e.currentTarget.style.background = "white")
                 }
               >
-                MAKE A PLEDGE
+                MAKE YOUR PLEDGE
               </button>
             </div>
           </div>
