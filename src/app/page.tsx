@@ -295,6 +295,10 @@ export default function HomePage() {
           >
             Palettes of Promise
           </div>
+          {/* subtitle of the logo - Where Every Stroke Funds a Future */}
+
+          {/* 1. Artwork With Highest Pledge
+          2. Artwork Most Pledged For */}
 
           <button
             className="hamburger"
@@ -611,212 +615,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        {/* // Middle Section - Light Background with Boxes (As per screenshot) */}
 
-        <div
-          className="middle-section"
-          style={{
-            background: "#ffffff",
-            padding: "100px 80px",
-            maxWidth: "1400px",
-            margin: "0 auto",
-            position: "relative",
-            overflow: "hidden",
-            color: "#000000",
-          }}
-        >
-          <div
-            className="middle-content"
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-end",
-              marginBottom: "80px",
-              position: "relative",
-              zIndex: 1,
-            }}
-          >
-            <div className="middle-text" style={{ maxWidth: "450px" }}>
-              <p
-                style={{
-                  fontSize: "17px",
-                  color: "rgba(0, 0, 0, 0.8)",
-                  lineHeight: "1.7",
-                }}
-              >
-                Not only a celebration of art, but also an opportunity to
-                transform lives
-              </p>
-            </div>
-            <h2
-              className="middle-title"
-              style={{
-                fontSize: "clamp(36px, 4vw, 56px)",
-                fontWeight: "900",
-                maxWidth: "600px",
-                textAlign: "right",
-                lineHeight: "1.1",
-                letterSpacing: "-1px",
-                color: "#000000",
-                textTransform: "uppercase",
-              }}
-            >
-              BUILDING FUTURES WITH EACH BRUSHSTROKE
-            </h2>
-          </div>
-          {/* Cards for Middle Section */}
-          <div
-            className="cards-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "30px",
-              position: "relative",
-              zIndex: 1,
-              alignItems: "stretch",
-            }}
-          >
-            {[
-              {
-                number: "1",
-                title: "Palettes of Promise",
-                isSpecial: false,
-                path: "/palettes-of-promise",
-              },
-              {
-                number: "2",
-                title: "View the Gallery",
-                isSpecial: false,
-                path: "/gallery",
-              },
-              {
-                number: "3",
-                title: "About the Artists",
-                isSpecial: true,
-                path: "/about-artists",
-              },
-              {
-                number: "4",
-                title: "Terms & Conditions",
-                isSpecial: false,
-                path: "/terms",
-              },
-            ].map((card, index) => (
-              <div
-                key={index}
-                className="card"
-                style={{
-                  background: card.isSpecial ? "#000000" : "#ffffff",
-                  color: card.isSpecial ? "#ffffff" : "#000000",
-                  border: card.isSpecial
-                    ? "none"
-                    : "1px solid rgba(0, 0, 0, 0.1)",
-                  borderRadius: "8px",
-                  padding: "40px 30px",
-                  height: "320px",
-                  position: "relative",
-                  overflow: "hidden",
-                  transition: "all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)",
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  textAlign: "center",
-                  boxShadow: card.isSpecial
-                    ? "0 15px 35px rgba(0, 0, 0, 0.3)"
-                    : "0 10px 25px rgba(0, 0, 0, 0.05)",
-                  transform: "perspective(1000px) translateZ(0)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform =
-                    "translateY(-10px) perspective(1000px) translateZ(10px)";
-                  e.currentTarget.style.boxShadow = card.isSpecial
-                    ? "0 20px 40px rgba(0, 0, 0, 0.4)"
-                    : "0 15px 30px rgba(0, 0, 0, 0.1)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform =
-                    "perspective(1000px) translateZ(0)";
-                  e.currentTarget.style.boxShadow = card.isSpecial
-                    ? "0 15px 35px rgba(0, 0, 0, 0.3)"
-                    : "0 10px 25px rgba(0, 0, 0, 0.05)";
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "28px",
-                    fontWeight: "800",
-                    marginBottom: "20px",
-                    color: card.isSpecial ? "#ffffff" : "#004276",
-                    width: "60px",
-                    height: "60px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: "50%",
-                    background: card.isSpecial
-                      ? "rgba(255,255,255,0.1)"
-                      : "rgba(0,66,118,0.1)",
-                    transition: "all 0.3s ease",
-                  }}
-                >
-                  {card.number}
-                </div>
-                <h3
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: "700",
-                    marginBottom: "20px",
-                    lineHeight: "1.3",
-                    zIndex: 1,
-                  }}
-                >
-                  {card.title}
-                </h3>
-                <button
-                  style={{
-                    padding: "12px 24px",
-                    background: card.isSpecial ? "#ffffff" : "#CBC3BA",
-                    border: "1px solid transparent",
-                    borderRadius: "4px",
-                    color: card.isSpecial ? "#000000" : "#004276",
-                    cursor: "pointer",
-                    fontWeight: "600",
-                    fontSize: "14px",
-                    transition: "all 0.3s ease",
-                    position: "relative",
-                    overflow: "hidden",
-                    zIndex: 1,
-                  }}
-                  onClick={() => router.push(card.path)}
-                  onMouseEnter={(e) => {
-                    const button = e.currentTarget;
-                    if (card.isSpecial) {
-                      button.style.background = "#004276";
-                      button.style.color = "#ffffff";
-                    } else {
-                      button.style.background = "#004276";
-                      button.style.color = "#ffffff";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    const button = e.currentTarget;
-                    if (card.isSpecial) {
-                      button.style.background = "#ffffff";
-                      button.style.color = "#000000";
-                    } else {
-                      button.style.background = "#CBC3BA";
-                      button.style.color = "#004276";
-                    }
-                  }}
-                >
-                  READ MORE
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
         {/* Artworks Gallery - Light Theme */}
         <section
           id="artworks-section"
@@ -1035,6 +834,212 @@ export default function HomePage() {
             }
           }
         `}</style>
+        {/* // Middle Section - Light Background with Boxes (As per screenshot) */}
+
+        <div
+          className="middle-section"
+          style={{
+            background: "#ffffff",
+            padding: "100px 80px",
+            maxWidth: "1400px",
+            margin: "0 auto",
+            position: "relative",
+            overflow: "hidden",
+            color: "#000000",
+          }}
+        >
+          <div
+            className="middle-content"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-end",
+              marginBottom: "80px",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            <div className="middle-text" style={{ maxWidth: "450px" }}>
+              <p
+                style={{
+                  fontSize: "17px",
+                  color: "rgba(0, 0, 0, 0.8)",
+                  lineHeight: "1.7",
+                }}
+              >
+                Not only a celebration of art, but also an opportunity to
+                transform lives
+              </p>
+            </div>
+            <h2
+              className="middle-title"
+              style={{
+                fontSize: "clamp(36px, 4vw, 56px)",
+                fontWeight: "900",
+                maxWidth: "600px",
+                textAlign: "right",
+                lineHeight: "1.1",
+                letterSpacing: "-1px",
+                color: "#000000",
+                textTransform: "uppercase",
+              }}
+            >
+              BUILDING FUTURES WITH EACH BRUSHSTROKE
+            </h2>
+          </div>
+          {/* Cards for Middle Section */}
+          <div
+            className="cards-grid"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: "30px",
+              position: "relative",
+              zIndex: 1,
+              alignItems: "stretch",
+            }}
+          >
+            {[
+              {
+                number: "1",
+                title: "Palettes of Promise",
+                isSpecial: false,
+                path: "/palettes-of-promise",
+              },
+              {
+                number: "2",
+                title: "View the Gallery",
+                isSpecial: false,
+                path: "/gallery",
+              },
+              {
+                number: "3",
+                title: "About the Artists",
+                isSpecial: true,
+                path: "/about-artists",
+              },
+              {
+                number: "4",
+                title: "Terms & Conditions",
+                isSpecial: false,
+                path: "/terms",
+              },
+            ].map((card, index) => (
+              <div
+                key={index}
+                className="card"
+                style={{
+                  background: card.isSpecial ? "#000000" : "#ffffff",
+                  color: card.isSpecial ? "#ffffff" : "#000000",
+                  border: card.isSpecial
+                    ? "none"
+                    : "1px solid rgba(0, 0, 0, 0.1)",
+                  borderRadius: "8px",
+                  padding: "40px 30px",
+                  height: "320px",
+                  position: "relative",
+                  overflow: "hidden",
+                  transition: "all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  textAlign: "center",
+                  boxShadow: card.isSpecial
+                    ? "0 15px 35px rgba(0, 0, 0, 0.3)"
+                    : "0 10px 25px rgba(0, 0, 0, 0.05)",
+                  transform: "perspective(1000px) translateZ(0)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform =
+                    "translateY(-10px) perspective(1000px) translateZ(10px)";
+                  e.currentTarget.style.boxShadow = card.isSpecial
+                    ? "0 20px 40px rgba(0, 0, 0, 0.4)"
+                    : "0 15px 30px rgba(0, 0, 0, 0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform =
+                    "perspective(1000px) translateZ(0)";
+                  e.currentTarget.style.boxShadow = card.isSpecial
+                    ? "0 15px 35px rgba(0, 0, 0, 0.3)"
+                    : "0 10px 25px rgba(0, 0, 0, 0.05)";
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "28px",
+                    fontWeight: "800",
+                    marginBottom: "20px",
+                    color: card.isSpecial ? "#ffffff" : "#004276",
+                    width: "60px",
+                    height: "60px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "50%",
+                    background: card.isSpecial
+                      ? "rgba(255,255,255,0.1)"
+                      : "rgba(0,66,118,0.1)",
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  {card.number}
+                </div>
+                <h3
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: "700",
+                    marginBottom: "20px",
+                    lineHeight: "1.3",
+                    zIndex: 1,
+                  }}
+                >
+                  {card.title}
+                </h3>
+                <button
+                  style={{
+                    padding: "12px 24px",
+                    background: card.isSpecial ? "#ffffff" : "#CBC3BA",
+                    border: "1px solid transparent",
+                    borderRadius: "4px",
+                    color: card.isSpecial ? "#000000" : "#004276",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                    fontSize: "14px",
+                    transition: "all 0.3s ease",
+                    position: "relative",
+                    overflow: "hidden",
+                    zIndex: 1,
+                  }}
+                  onClick={() => router.push(card.path)}
+                  onMouseEnter={(e) => {
+                    const button = e.currentTarget;
+                    if (card.isSpecial) {
+                      button.style.background = "#004276";
+                      button.style.color = "#ffffff";
+                    } else {
+                      button.style.background = "#004276";
+                      button.style.color = "#ffffff";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    const button = e.currentTarget;
+                    if (card.isSpecial) {
+                      button.style.background = "#ffffff";
+                      button.style.color = "#000000";
+                    } else {
+                      button.style.background = "#CBC3BA";
+                      button.style.color = "#004276";
+                    }
+                  }}
+                >
+                  READ MORE
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
       </main>
     </div>
   );
