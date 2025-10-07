@@ -632,8 +632,8 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+        {/* // Middle Section - Light Background with Boxes (As per screenshot) */}
 
-        {/* Middle Section - Light Background with Boxes (As per screenshot) */}
         <div
           className="middle-section"
           style={{
@@ -665,8 +665,8 @@ export default function HomePage() {
                   lineHeight: "1.7",
                 }}
               >
-                A place where creativity has no rules! Whether you are picking
-                up a brush for the first time or refining your skills.
+                Not only a celebration of art, but also an opportunity to
+                transform lives
               </p>
             </div>
             <h2
@@ -682,7 +682,7 @@ export default function HomePage() {
                 textTransform: "uppercase",
               }}
             >
-              INSPIRING CREATIVITY, ONE BRUSH AT A TIME
+              BUILDING FUTURES WITH EACH BRUSHSTROKE
             </h2>
           </div>
           {/* Cards for Middle Section */}
@@ -691,7 +691,7 @@ export default function HomePage() {
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "24px",
+              gap: "30px",
               position: "relative",
               zIndex: 1,
               alignItems: "stretch",
@@ -699,165 +699,145 @@ export default function HomePage() {
           >
             {[
               {
-                number: "[1]",
-                title: "Our studio is a vibrant haven",
-                text: "Our studio is a vibrant haven where imagination meets skill. We provide a creative space for artists of all levels to explore.",
-                image: "/images/artwork2.jpg",
+                number: "1",
+                title: "Palettes of Promise",
                 isSpecial: false,
-                isImageTop: true,
+                path: "/palettes-of-promise",
               },
               {
-                number: "[2]",
-                title: "With an inspiring atmosphere",
-                text: "With an inspiring atmosphere, expert guidance, and top-quality materials, we nurture artistic growth and bring unique visions to life.",
-                image: "/images/artwork3.jpg",
+                number: "2",
+                title: "View the Gallery",
                 isSpecial: false,
-                isImageTop: false,
+                path: "/gallery",
               },
               {
-                number: "15+ Year",
-                title: "15+ Years",
-                text: "The studio offers a warm and welcoming space where artists of all skill levels can practice painting, drawing, sculpture, and more.",
-                image: "/images/artwork4.jpg",
+                number: "3",
+                title: "About the Artists",
                 isSpecial: true,
-                isImageTop: false,
+                path: "/about-artists",
               },
               {
-                number: "[3]",
-                title: "Whether you're creating for passion",
-                text: "Whether you're creating for passion, learning new techniques, or preparing for exhibitions, our studio is the perfect place to turn your ideas into reality.",
-                image: "/images/artwork1.jpg",
+                number: "4",
+                title: "Terms & Conditions",
                 isSpecial: false,
-                isImageTop: true,
+                path: "/terms",
               },
             ].map((card, index) => (
               <div
                 key={index}
                 className="card"
                 style={{
-                  background: card.isSpecial
-                    ? "#000000"
-                    : card.isImageTop
-                    ? "#f9f9f9"
-                    : "#ffffff",
-                  color:
-                    card.isSpecial || card.isImageTop ? "#000000" : "#000000",
+                  background: card.isSpecial ? "#000000" : "#ffffff",
+                  color: card.isSpecial ? "#ffffff" : "#000000",
                   border: card.isSpecial
                     ? "none"
                     : "1px solid rgba(0, 0, 0, 0.1)",
-                  borderRadius: "0",
-                  padding: "25px",
-                  height: "400px",
+                  borderRadius: "8px",
+                  padding: "40px 30px",
+                  height: "320px",
                   position: "relative",
                   overflow: "hidden",
-                  transition: "all 0.3s ease",
+                  transition: "all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)",
                   cursor: "pointer",
                   display: "flex",
                   flexDirection: "column",
-                  justifyContent: "space-between",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  textAlign: "center",
                   boxShadow: card.isSpecial
-                    ? "0 10px 30px rgba(0, 0, 0, 0.2)"
-                    : "none",
+                    ? "0 15px 35px rgba(0, 0, 0, 0.3)"
+                    : "0 10px 25px rgba(0, 0, 0, 0.05)",
+                  transform: "perspective(1000px) translateZ(0)",
                 }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.transform = "translateY(-5px)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.transform = "translateY(0)")
-                }
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform =
+                    "translateY(-10px) perspective(1000px) translateZ(10px)";
+                  e.currentTarget.style.boxShadow = card.isSpecial
+                    ? "0 20px 40px rgba(0, 0, 0, 0.4)"
+                    : "0 15px 30px rgba(0, 0, 0, 0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform =
+                    "perspective(1000px) translateZ(0)";
+                  e.currentTarget.style.boxShadow = card.isSpecial
+                    ? "0 15px 35px rgba(0, 0, 0, 0.3)"
+                    : "0 10px 25px rgba(0, 0, 0, 0.05)";
+                }}
               >
-                {/* Number/Title on top-left (for text-only card) or bottom-left (for special card) */}
                 <div
                   style={{
-                    position: "absolute",
-                    top: card.isImageTop || card.isSpecial ? "25px" : "auto",
-                    bottom: card.isImageTop ? "auto" : "25px",
-                    left: "25px",
-                    color: card.isSpecial ? "#ffffff" : "#000000",
-                    fontSize: "14px",
-                    fontWeight: "700",
-                    zIndex: 2,
+                    fontSize: "28px",
+                    fontWeight: "800",
+                    marginBottom: "20px",
+                    color: card.isSpecial ? "#ffffff" : "#004276",
+                    width: "60px",
+                    height: "60px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "50%",
+                    background: card.isSpecial
+                      ? "rgba(255,255,255,0.1)"
+                      : "rgba(0,66,118,0.1)",
+                    transition: "all 0.3s ease",
                   }}
                 >
                   {card.number}
                 </div>
-
-                {card.isSpecial ? (
-                  // Special Card Content
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      textAlign: "center",
-                      height: "100%",
-                      padding: "20px",
-                    }}
-                  >
-                    <h3
-                      style={{
-                        fontSize: "42px",
-                        fontWeight: "900",
-                        marginBottom: "10px",
-                        color: "#ffffff",
-                        lineHeight: "1",
-                      }}
-                    >
-                      {card.number}
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "14px",
-                        color: "rgba(255, 255, 255, 0.7)",
-                        lineHeight: "1.5",
-                      }}
-                    >
-                      {card.text}
-                    </p>
-                  </div>
-                ) : (
-                  // Standard Card Content
-                  <>
-                    {/* Image Box */}
-                    {card.isImageTop && (
-                      <div
-                        style={{
-                          width: "100%",
-                          height: "60%",
-                          overflow: "hidden",
-                          marginBottom: "20px",
-                          position: "relative",
-                        }}
-                      >
-                        <Image
-                          src={card.image}
-                          alt="Card Image"
-                          fill
-                          style={{
-                            objectFit: "cover",
-                          }}
-                        />
-                      </div>
-                    )}
-                    {/* Text Content */}
-                    <p
-                      style={{
-                        fontSize: "15px",
-                        color: card.isImageTop ? "#333" : "rgba(0, 0, 0, 0.9)",
-                        lineHeight: "1.6",
-                        flexGrow: 1,
-                      }}
-                    >
-                      {card.text}
-                    </p>
-                  </>
-                )}
+                <h3
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: "700",
+                    marginBottom: "20px",
+                    lineHeight: "1.3",
+                    zIndex: 1,
+                  }}
+                >
+                  {card.title}
+                </h3>
+                <button
+                  style={{
+                    padding: "12px 24px",
+                    background: card.isSpecial ? "#ffffff" : "#CBC3BA",
+                    border: "1px solid transparent",
+                    borderRadius: "4px",
+                    color: card.isSpecial ? "#000000" : "#004276",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                    fontSize: "14px",
+                    transition: "all 0.3s ease",
+                    position: "relative",
+                    overflow: "hidden",
+                    zIndex: 1,
+                  }}
+                  onClick={() => router.push(card.path)}
+                  onMouseEnter={(e) => {
+                    const button = e.currentTarget;
+                    if (card.isSpecial) {
+                      button.style.background = "#004276";
+                      button.style.color = "#ffffff";
+                    } else {
+                      button.style.background = "#004276";
+                      button.style.color = "#ffffff";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    const button = e.currentTarget;
+                    if (card.isSpecial) {
+                      button.style.background = "#ffffff";
+                      button.style.color = "#000000";
+                    } else {
+                      button.style.background = "#CBC3BA";
+                      button.style.color = "#004276";
+                    }
+                  }}
+                >
+                  READ MORE
+                </button>
               </div>
             ))}
           </div>
         </div>
-
         {/* Artworks Gallery - Light Theme */}
         <section
           id="artworks-section"
@@ -1066,7 +1046,6 @@ export default function HomePage() {
             ))}
           </div>
         </section>
-
         <style>{`
           @keyframes pulse {
             0%, 100% {
