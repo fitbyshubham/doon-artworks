@@ -178,7 +178,7 @@ export default function Footer() {
           Palettes of Promise
         </h2>
         <p className="text-base italic text-[#004276] leading-relaxed">
-          Where Art Meets Education
+          Where Every Stroke Funds a Future
         </p>
       </div>
 
