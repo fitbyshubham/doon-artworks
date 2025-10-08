@@ -10,9 +10,9 @@ export default function Header() {
 
   // Navigation items
   const navItems = [
-    { name: "Artists", href: "/artists" },
+    { name: "Artists", href: "/about-artists" },
     { name: "Artworks", href: "#artworks-section" },
-    { name: "About Us", href: "/about" },
+    { name: "About Us", href: "/palettes-of-promise" },
   ];
 
   return (
