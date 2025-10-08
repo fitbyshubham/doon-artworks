@@ -12,6 +12,18 @@ export default function ArtistsPage() {
   // Artist data (you can move this to a separate file or CMS later)
   const artists = [
     {
+      name: "Aloke Tirtha Bhowmick",
+      bio: "is the former head of the Art Department at The Doon School. He holds a Master of Fine Arts degree from Shantiniketan.",
+    },
+    {
+      name: "Pradiptaa Chakraborty",
+      bio: "is an abstract painter trained in graphics at Kala Bhavana, Shantiniketan and painting at Rabindra Bharati University. His vibrant works often draw on literature and performing arts (notably Bengali street theatre). He has held solo shows across India and participated in international group exhibitions, and his works are included in private collections of individuals such as Shashi Tharoor and Kalki Koechlin.",
+    },
+    {
+      name: "Dr Dipto Narayan Chattopadhyay",
+      bio: "is an internationally acclaimed contemporary artist who has held over 500 exhibitions worldwide (solo and group). His mixed-media paintings and sculptures often explore human forms and narrative themes. His global exposure and recognition place him among India’s most exhibited artists. Dipto holds a Master of Fine Arts from Jiwaji University in Gwalior.",
+    },
+    {
       name: "Neeraja Divate",
       bio: "is a non-figurative multimedia artist from Andhra Pradesh. She trained under Rameshwar Broota at Triveni Kala Sangam in New Delhi and was awarded a senior fellowship by the Ministry of Culture for 2017–2019. Neeraja’s mixed-media works have appeared in exhibitions both in India and abroad and often reflect contemplative minimalism and abstraction rooted in day-to-day forms.",
     },
@@ -34,30 +46,6 @@ export default function ArtistsPage() {
     {
       name: "Pratham Kaushik",
       bio: "is from Dehradun and presently in his final year at Shantiniketan. He is considered amongst the finest prospects in his class and has been an assistant to S.K. Sabajahan.",
-    },
-    {
-      name: "Sudesh Mahan",
-      bio: "is a renowned Indian visual artist educated at St. Aloysius College. His artistic journey began with a two-man exhibition at age 18, followed by group and street exhibitions across coastal Karnataka and Bangalore. Mahan transitioned from a career as an art director in theatre, film and television to focus on painting. His multifaceted career reflects a deep commitment to artistic expression across various media.",
-    },
-    {
-      name: "S.K. Sahajahan",
-      bio: "is a contemporary Indian painter and educator presently serving as an assistant professor of painting at Kala Bhavana, Visva Bharati University, Shantiniketan. His works reflect his focus on human relationships and contemporary sociopolitical themes. Sahajahan has held solo exhibitions and participated in many group shows globally. His honours include two Elizabeth Greenshield Foundation Grants (in 1998 and 2000) and the Avantika Award (bronze medal in 1998).",
-    },
-    {
-      name: "Victor Selvaraj",
-      bio: "was a painter known for his vibrant portrait and abstract paintings that reflect a deep connection to his Tamil heritage. A former head artist at Lalit Kala Akademi in Lucknow, his works are held in various collections and adorn homes, offices and museums in India, Germany, Canada, France and Japan.",
-    },
-    {
-      name: "Aloke Tirtha Bhowmick",
-      bio: "is the former head of the Art Department at The Doon School. He holds a Master of Fine Arts degree from Shantiniketan.",
-    },
-    {
-      name: "Pradiptaa Chakraborty",
-      bio: "is an abstract painter trained in graphics at Kala Bhavana, Shantiniketan and painting at Rabindra Bharati University. His vibrant works often draw on literature and performing arts (notably Bengali street theatre). He has held solo shows across India and participated in international group exhibitions, and his works are included in private collections of individuals such as Shashi Tharoor and Kalki Koechlin.",
-    },
-    {
-      name: "Dr Dipto Narayan Chattopadhyay",
-      bio: "is an internationally acclaimed contemporary artist who has held over 500 exhibitions worldwide (solo and group). His mixed-media paintings and sculptures often explore human forms and narrative themes. His global exposure and recognition place him among India’s most exhibited artists. Dipto holds a Master of Fine Arts from Jiwaji University in Gwalior.",
     },
   ];
 
