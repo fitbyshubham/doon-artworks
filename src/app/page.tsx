@@ -262,130 +262,6 @@ export default function HomePage() {
         }
       `}</style>
 
-      {/* Header */}
-      <header
-        style={{
-          padding: "20px 40px",
-          position: "relative",
-          top: 0,
-          zIndex: 1000,
-          background: "transparent",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1400px",
-            margin: "0 auto",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <div
-            className="logo"
-            style={{
-              fontSize: "28px",
-              fontWeight: "800",
-              letterSpacing: "1px",
-              color: "#000000",
-              textTransform: "uppercase",
-              cursor: "pointer",
-            }}
-            onClick={() => router.push("/")}
-          >
-            Palettes of Promise
-          </div>
-          {/* subtitle of the logo - Where Every Stroke Funds a Future */}
-
-          {/* 1. Artwork With Highest Pledge
-          2. Artwork Most Pledged For */}
-
-          <button
-            className="hamburger"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <div className="hamburger-line"></div>
-            <div className="hamburger-line"></div>
-            <div className="hamburger-line"></div>
-          </button>
-
-          <nav
-            className="desktop-nav"
-            style={{
-              display: "flex",
-              gap: "40px",
-              fontSize: "14px",
-              fontWeight: "500",
-            }}
-          >
-            {["HOME", "ARTWORKS"].map((item) => (
-              <a
-                key={item}
-                href={item === "ARTWORKS" ? "#artworks-section" : "#"}
-                style={{
-                  textDecoration: "none",
-                  color: item === "HOME" ? "#000000" : "rgba(0, 0, 0, 0.7)",
-                  position: "relative",
-                  transition: "color 0.3s ease",
-                  letterSpacing: "1.5px",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#000000")}
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.color =
-                    item === "HOME" ? "#000000" : "rgba(0, 0, 0, 0.7)")
-                }
-              >
-                {item}
-              </a>
-            ))}
-          </nav>
-        </div>
-
-        <div className={`mobile-menu ${isMenuOpen ? "open" : ""}`}>
-          <div
-            className="mobile-logo"
-            style={{
-              fontSize: "24px",
-              fontWeight: "800",
-              letterSpacing: "1px",
-              color: "#000000",
-              textTransform: "uppercase",
-              cursor: "pointer",
-              textAlign: "center",
-              marginBottom: "20px",
-              padding: "10px 0",
-            }}
-            onClick={() => {
-              router.push("/");
-              setIsMenuOpen(false);
-            }}
-          >
-            Palettes of Promise
-          </div>
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "15px" }}
-          >
-            {["HOME", "ARTWORKS"].map((item) => (
-              <a
-                key={item}
-                href={item === "ARTWORKS" ? "#artworks-section" : "#"}
-                style={{
-                  textDecoration: "none",
-                  color: item === "HOME" ? "#000000" : "rgba(0, 0, 0, 0.7)",
-                  position: "relative",
-                  transition: "color 0.3s ease",
-                  letterSpacing: "1.5px",
-                  textAlign: "center",
-                  padding: "8px 0",
-                }}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item}
-              </a>
-            ))}
-          </div>
-        </div>
-      </header>
       <main style={{ maxWidth: "100%", margin: "0 auto", padding: "0" }}>
         {/* Hero Section - Split Layout (As per screenshot) */}
         <div
@@ -757,68 +633,37 @@ export default function HomePage() {
                       Starting Bid: ₹{artwork.startingBid.toLocaleString()}
                     </p>
                   </div>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleExploreClick(artwork.id);
-                      }}
-                      style={{
-                        flex: 1,
-                        padding: "8px 12px",
-                        background: "#CBC3BA",
-                        border: "1px solid #CBC3BA",
-                        borderRadius: "0",
-                        color: "#000000",
-                        cursor: "pointer",
-                        fontWeight: "500",
-                        fontSize: "12px",
-                        transition: "background 0.2s ease, color 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#004276";
-                        e.currentTarget.style.color = "#ffffff";
-                        e.currentTarget.style.borderColor = "#004276";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#CBC3BA";
-                        e.currentTarget.style.color = "#000000";
-                        e.currentTarget.style.borderColor = "#CBC3BA";
-                      }}
-                    >
-                      Explore Now
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleBidClick(artwork.id);
-                      }}
-                      style={{
-                        flex: 1,
-                        padding: "8px 12px",
-                        background: "#004276",
-                        border: "1px solid #004276",
-                        borderRadius: "0",
-                        color: "#ffffff",
-                        cursor: "pointer",
-                        fontWeight: "500",
-                        fontSize: "12px",
-                        transition: "background 0.2s ease, color 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#ffffff";
-                        e.currentTarget.style.color = "#004276";
-                        e.currentTarget.style.borderColor = "#004276";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#004276";
-                        e.currentTarget.style.color = "#ffffff";
-                        e.currentTarget.style.borderColor = "#004276";
-                      }}
-                    >
-                      Bid Now
-                    </button>
-                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBidClick(artwork.id); // or handlePledgeClick if you have a separate function
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      background: "#CBC3BA",
+                      border: "1px solid #CBC3BA",
+                      borderRadius: "0",
+                      color: "#004276", // ✅ blue text as requested
+                      cursor: "pointer",
+                      fontWeight: "600",
+                      fontSize: "13px",
+                      transition: "background 0.2s ease, color 0.2s ease",
+                      fontFamily: "Georgia, serif",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#004276";
+                      e.currentTarget.style.color = "#ffffff";
+                      e.currentTarget.style.borderColor = "#004276";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "#CBC3BA";
+                      e.currentTarget.style.color = "#004276";
+                      e.currentTarget.style.borderColor = "#CBC3BA";
+                    }}
+                  >
+                    Make Your Pledge
+                  </button>
                 </div>
               </div>
             ))}
