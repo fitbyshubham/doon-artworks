@@ -47,6 +47,19 @@ export default function ArtistsPage() {
       name: "Pratham Kaushik",
       bio: "is from Dehradun and presently in his final year at Shantiniketan. He is considered amongst the finest prospects in his class and has been an assistant to S.K. Sabajahan.",
     },
+    // --- New Artists Added Below ---
+    {
+      name: "Sudesh Mahan",
+      bio: "is a renowned Indian visual artist educated at St. Aloysius College. His artistic journey began with a two-man exhibition at age 18, followed by group and street exhibitions across coastal Karnataka and Bangalore. Mahan transitioned from a career as an art director in theatre, film and television to focus on painting. His multifaceted career reflects a deep commitment to artistic expression across various media.",
+    },
+    {
+      name: "S.K. Sahajahan",
+      bio: "is a contemporary Indian painter and educator presently serving as an assistant professor of painting at Kala Bhavana, Visva Bharati University, Shantiniketan. His works reflect his focus on human relationships and contemporary sociopolitical themes. Sahajahan has held solo exhibitions and participated in many group shows globally. His honours include two Elizabeth Greenshield Foundation Grants (in 1998 and 2000) and the Avantika Award (bronze medal in 1998).",
+    },
+    {
+      name: "Victor Selvaraj",
+      bio: "was a painter known for his vibrant portrait and abstract paintings that reflect a deep connection to his Tamil heritage. A former head artist at Lalit Kala Akademi in Lucknow, his works are held in various collections and adorn homes, offices and museums in India, Germany, Canada, France and Japan.",
+    },
   ];
 
   return (
