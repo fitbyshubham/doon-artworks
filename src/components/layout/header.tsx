@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  // Navigation items
   const navItems = [
     { name: "Artists", href: "/about-artists" },
     { name: "Artworks", href: "#artworks-section" },
@@ -19,17 +19,28 @@ export default function Header() {
     <header className="sticky top-6 z-50 px-4 mb-10">
       {/* Desktop Header */}
       <div className="hidden md:flex items-center justify-between max-w-7xl mx-auto rounded-full bg-white px-8 py-4 shadow-lg">
-        {/* Logo + Subtitle */}
-        <div className="flex flex-col">
-          <Link
-            href="/"
-            className="font-bold text-xl md:text-2xl text-[#004276] tracking-wide"
-          >
-            Palettes of Promise
+        {/* Logo + Branding */}
+        <div className="flex items-center space-x-3">
+          <Link href="/" className="flex-shrink-0">
+            <Image
+              src="/images/logo-header.png" // ✅ Update this path to your actual logo
+              alt="Palettes of Promise Logo"
+              width={48} // Adjust size as needed
+              height={48}
+              className="object-contain"
+            />
           </Link>
-          <span className="text-xs md:text-sm text-[#004276] italic opacity-90 mt-1">
-            Where Every Brushstroke Funds a Future
-          </span>
+          <div className="flex flex-col">
+            <Link
+              href="/"
+              className="font-bold text-xl md:text-2xl text-[#004276] tracking-wide"
+            >
+              Palettes of Promise
+            </Link>
+            <span className="text-xs md:text-sm text-[#004276] italic opacity-90 mt-1">
+              Where Every Brushstroke Funds a Future
+            </span>
+          </div>
         </div>
 
         {/* Navigation Links */}
@@ -48,7 +59,7 @@ export default function Header() {
         {/* CTA Button */}
         <button
           onClick={() => {
-            // You can add a scroll-to-pledge or modal trigger here
+            // Add scroll-to-pledge or modal logic here if needed
           }}
           className="bg-[#CBC3BA] text-[#004276] font-bold py-2 px-6 rounded-full hover:bg-[#c2b9b0] transition-colors"
         >
@@ -58,7 +69,16 @@ export default function Header() {
 
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white rounded-full shadow-lg">
-        <div className="flex flex-col">
+        <div className="flex items-center space-x-2">
+          <Link href="/" className="flex-shrink-0">
+            <Image
+              src="/images/logo-header.png" // ✅ Same logo path
+              alt="Palettes of Promise Logo"
+              width={40}
+              height={40}
+              className="object-contain"
+            />
+          </Link>
           <Link
             href="/"
             className="font-bold text-lg text-[#004276] tracking-wide"
