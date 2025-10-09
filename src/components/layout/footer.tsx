@@ -70,7 +70,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className="hidden md:block">
+          {/* <div className="hidden md:block">
             <h3 className="text-lg font-bold mb-4 text-[#004276] tracking-wide">
               Social
             </h3>
@@ -106,7 +106,7 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Mobile: Single Row */}
           <div className="md:hidden flex flex-wrap justify-center gap-10 text-base leading-relaxed">
@@ -139,33 +139,6 @@ export default function Footer() {
               </a>
               <a href="/faq" className="hover:underline text-[#004276]">
                 FAQ’s
-              </a>
-            </div>
-            <div className="flex flex-col items-center space-y-3">
-              <h4 className="font-bold text-[#004276] tracking-wide">Social</h4>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline text-[#004276]"
-              >
-                Instagram
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline text-[#004276]"
-              >
-                LinkedIn
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline text-[#004276]"
-              >
-                YouTube
               </a>
             </div>
           </div>
