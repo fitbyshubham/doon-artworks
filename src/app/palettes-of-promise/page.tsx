@@ -33,37 +33,6 @@ export default function ArtisticLayout() {
       <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50/20 to-white -z-10"></div>
 
       {/* Desktop-only floating images */}
-      <div
-        id="palette-img"
-        className="hidden md:block absolute top-10 right-0 w-48 md:w-72 opacity-70 hover:opacity-90 transition-opacity duration-300 z-0 pointer-events-none"
-        style={{ transform: "translateY(0px)" }}
-      >
-        <Image
-          src="/images/palette.png"
-          alt="Art Palette Design Element"
-          width={280}
-          height={280}
-          className="rounded-lg shadow-lg"
-          priority={false}
-          loading="lazy"
-        />
-      </div>
-
-      <div
-        id="paletteOne-img"
-        className="hidden md:block absolute bottom-10 left-0 w-40 md:w-64 opacity-60 hover:opacity-80 transition-opacity duration-300 z-0 pointer-events-none"
-        style={{ transform: "translateY(0px)" }}
-      >
-        <Image
-          src="/images/paletteOne.png"
-          alt="Second Art Palette Element"
-          width={240}
-          height={240}
-          className="rounded-lg shadow-md"
-          priority={false}
-          loading="lazy"
-        />
-      </div>
 
       {/* Main Content */}
       <div ref={containerRef} className="max-w-4xl mx-auto relative z-10">

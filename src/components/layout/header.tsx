@@ -28,7 +28,7 @@ export default function Header() {
             Palettes of Promise
           </Link>
           <span className="text-xs md:text-sm text-[#004276] italic opacity-90 mt-1">
-            Where Every Brush Stroke Funds a Future
+            Where Every Brushstroke Funds a Future
           </span>
         </div>
 
