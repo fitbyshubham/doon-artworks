@@ -1,5 +1,6 @@
 // src/app/artwork/[id]/page.tsx
-"use client";
+// NOTE: No "use client" at the top. This file uses a Server Component that renders a Client Component.
+
 import { notFound } from "next/navigation";
 import { artworks as artworkData } from "@/data/artworks.json";
 
@@ -45,14 +46,17 @@ interface PledgeHistoryItem {
 
 // --- SERVER COMPONENT ---
 // This part fetches data on the server. It must be async to handle `params`.
+// Next.js 15 requires awaiting the `params` Promise.
 export default async function ArtworkDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>; // params is a Promise in Next.js 15
 }) {
-  // In Next.js 15, `params` is a Promise. We must `await` it.
+  // --- CORRECTLY AWAIT PARAMS ---
+  // In Next.js 15, `params` is a Promise. We must `await` it to get the actual values.
   const resolvedParams = await params;
   const { id: artworkId } = resolvedParams;
+  // --- END CORRECTLY AWAIT PARAMS ---
 
   const foundArtworkJSON = artworkData.find((art) => art.id === artworkId);
 
@@ -123,6 +127,7 @@ const generateMockPledgeHistory = (
 // --- CLIENT COMPONENT ---
 // This part handles interactivity (state, form). It receives data as props.
 // Marked as a Client Component
+("use client");
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -465,15 +470,14 @@ const ArtworkDetailClient = ({
                   {/* Updated label */}
                   <input
                     type="number"
-                    id="pledgeAmount" // Corrected attribute name
-                    name="pledgeAmount" // Corrected attribute name
-                    value={formData.pledgeAmount} // Corrected attribute name
+                    id="pledgeAmount"
+                    name="pledgeAmount"
+                    value={formData.pledgeAmount}
                     onChange={handleInputChange}
                     className="form-input"
                     min={minimumPledge}
                   />
-                  <div className="error-text">{errors.pledgeAmount}</div>{" "}
-                  {/* Corrected error key */}
+                  <div className="error-text">{errors.pledgeAmount}</div>
                 </div>
               </div>
               <div className="action-buttons">

@@ -264,6 +264,7 @@ export default function HomePage() {
 
       <main style={{ maxWidth: "100%", margin: "0 auto", padding: "0" }}>
         {/* Hero Section - Split Layout (As per screenshot) */}
+        {/* Hero Section - Split Layout */}
         <div
           className="hero-container"
           style={{
@@ -289,19 +290,15 @@ export default function HomePage() {
                 src={heroArtworkLeft.image}
                 alt={heroArtworkLeft.title}
                 fill
-                style={{
-                  objectFit: "cover",
-                }}
-                priority // For hero images
+                style={{ objectFit: "cover" }}
+                priority
               />
             ) : (
               <Image
                 src="/images/artwork4.jpg"
                 alt="Default Hero"
                 fill
-                style={{
-                  objectFit: "cover",
-                }}
+                style={{ objectFit: "cover" }}
               />
             )}
             <div
@@ -325,6 +322,21 @@ export default function HomePage() {
                 justifyContent: "flex-end",
               }}
             >
+              {/* 👇 Added Heading */}
+              <h2
+                style={{
+                  fontSize: "20px",
+                  fontWeight: "700",
+                  color: "#ffffff",
+                  textTransform: "uppercase",
+                  letterSpacing: "1.5px",
+                  marginBottom: "16px",
+                  opacity: 0.9,
+                }}
+              >
+                Artwork With Most Pledge
+              </h2>
+
               <div
                 className="hero-artist"
                 style={{
@@ -396,19 +408,15 @@ export default function HomePage() {
                 src={heroArtworkRight.image}
                 alt={heroArtworkRight.title}
                 fill
-                style={{
-                  objectFit: "cover",
-                }}
-                priority // For hero images
+                style={{ objectFit: "cover" }}
+                priority
               />
             ) : (
               <Image
                 src="/images/artwork1.jpg"
                 alt="Default Hero"
                 fill
-                style={{
-                  objectFit: "cover",
-                }}
+                style={{ objectFit: "cover" }}
               />
             )}
             <div
@@ -432,6 +440,21 @@ export default function HomePage() {
                 justifyContent: "flex-end",
               }}
             >
+              {/* 👇 Added Heading */}
+              <h2
+                style={{
+                  fontSize: "20px",
+                  fontWeight: "700",
+                  color: "#ffffff",
+                  textTransform: "uppercase",
+                  letterSpacing: "1.5px",
+                  marginBottom: "16px",
+                  opacity: 0.9,
+                }}
+              >
+                Artwork With Highest Pledge
+              </h2>
+
               <div
                 className="hero-artist"
                 style={{
@@ -491,6 +514,51 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+
+        {/* Responsive Styles (Add to your global CSS or in a <style> tag) */}
+        <style jsx>{`
+          @media (max-width: 900px) {
+            .hero-container {
+              grid-template-columns: 1fr !important;
+              gap: 20px !important;
+            }
+
+            .hero-content {
+              padding: 50px 30px !important;
+            }
+
+            .hero-artist {
+              font-size: 22px !important;
+            }
+
+            .hero-title {
+              font-size: 26px !important;
+            }
+
+            /* Optional: reduce heading size on mobile */
+            .hero-content h2 {
+              font-size: 18px !important;
+            }
+          }
+
+          @media (max-width: 500px) {
+            .hero-content {
+              padding: 40px 20px !important;
+            }
+
+            .hero-artist {
+              font-size: 20px !important;
+            }
+
+            .hero-title {
+              font-size: 22px !important;
+            }
+
+            .hero-content h2 {
+              font-size: 16px !important;
+            }
+          }
+        `}</style>
 
         {/* Artworks Gallery - Light Theme */}
         <section
