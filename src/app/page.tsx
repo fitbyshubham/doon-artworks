@@ -684,7 +684,7 @@ export default function HomePage() {
                         animation: "pulse 1.5s infinite ease-in-out",
                       }}
                     >
-                      Starting Bid: ₹{artwork.startingBid.toLocaleString()}
+                      Starting Pledge: ₹{artwork.startingBid.toLocaleString()}
                     </p>
                   </div>
                   <button

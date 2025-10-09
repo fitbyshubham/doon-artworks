@@ -4,8 +4,9 @@
 
 import { notFound } from "next/navigation";
 import { artworks as artworkData } from "@/data/artworks.json";
-import { useState } from "react"; // Move useState import here, after "use client"
-import { useRouter } from "next/navigation"; // Move useRouter import here, after "use client"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createSupabaseBrowserClient } from "@/lib/supabase-client";
 
 // --- Interfaces matching your JSON structure ---
 interface ArtworkJSON {
@@ -40,25 +41,16 @@ interface Artwork {
   topBid: number; // Represents current top pledge (starts as startingBid)
 }
 
-// Interface for pledge history items
-interface PledgeHistoryItem {
-  id: number;
-  pledge: number;
-  time: string; // e.g., "X hours/days ago"
+// Interface for pledge items fetched from Supabase
+interface SupabasePledge {
+  id: string; // UUID from Supabase
+  name: string;
+  pledge_amount: number;
+  created_at: string; // ISO string
 }
 
 // --- CLIENT COMPONENT ---
-// This component handles interactivity (state, form).
-// It receives data as props.
-// It MUST be AFTER the "use client" directive.
-
-const ArtworkDetailClient = ({
-  artwork,
-  mockPledgeHistory,
-}: {
-  artwork: Artwork;
-  mockPledgeHistory: PledgeHistoryItem[];
-}) => {
+const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
@@ -70,6 +62,38 @@ const ArtworkDetailClient = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [imageZoom, setImageZoom] = useState(false);
+
+  // --- NEW STATES FOR SUPABASE INTEGRATION ---
+  const [pledges, setPledges] = useState<SupabasePledge[]>([]);
+  const [isFetchingPledges, setIsFetchingPledges] = useState(true);
+  // --- END NEW STATES ---
+
+  // --- INITIALIZE SUPABASE CLIENT ---
+  const supabase = createSupabaseBrowserClient();
+  // --- END INITIALIZE SUPABASE CLIENT ---
+
+  // --- FETCH PLEDGES FROM SUPABASE ---
+  useEffect(() => {
+    const fetchPledges = async () => {
+      setIsFetchingPledges(true);
+      const { data, error } = await supabase
+        .from("pledges")
+        .select("id, name, pledge_amount, created_at")
+        .eq("artwork_id", artwork.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching pledges from Supabase:", error);
+        setPledges([]);
+      } else {
+        setPledges(data || []);
+      }
+      setIsFetchingPledges(false);
+    };
+
+    fetchPledges();
+  }, [supabase, artwork.id]);
+  // --- END FETCH PLEDGES ---
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -117,32 +141,101 @@ const ArtworkDetailClient = ({
     }
   };
 
+  // Inside ArtworkDetailClient component
+
+  // --- UPDATE YOUR handleSubmit FUNCTION ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
     setIsSubmitting(true);
+    setSubmitSuccess(false);
+
     try {
-      console.log("Submitting pledge:", {
-        ...formData,
-        artworkId: artwork.id,
-        pledgeAmount: parseFloat(formData.pledgeAmount),
-      });
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setSubmitSuccess(true);
-      setTimeout(() => setSubmitSuccess(false), 5000);
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        pledgeAmount: (artwork.topBid + artwork.minimumIncrement).toString(),
-      });
-      setErrors({});
+      // --- 1. Prepare Pledge Data ---
+      const pledgeData = {
+        artwork_id: artwork.id,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || null,
+        pledge_amount: parseFloat(formData.pledgeAmount),
+      };
+
+      console.log(
+        "Preparing to submit pledge data to Supabase (Anonymously):",
+        pledgeData
+      );
+
+      // --- 2. Create a Dedicated Anonymous Supabase Client Instance ---
+      // This ensures the operation uses the ANON key only, ignoring any session token.
+      // It's a robust way to enforce public access for this specific write operation.
+      const anonSupabaseClient = createSupabaseBrowserClient(); // Use your existing client creator
+      // Note: The client created by `createSupabaseBrowserClient` using `@supabase/ssr`
+      // and the ANON key from env vars is designed to be anonymous-first.
+      // However, if a session cookie exists, it might still be used.
+      // To be absolutely sure, we can explicitly clear the session for this client instance.
+      // While `@supabase/ssr` handles much of this, explicitly signing out the temp client
+      // guarantees no session is used for the insert.
+      await anonSupabaseClient.auth.signOut(); // Force sign out to ensure anonymity
+
+      // --- 3. Submit to Supabase USING the Anonymous Client ---
+      const { data, error: insertError } = await anonSupabaseClient // <-- Use anon client
+        .from("pledges")
+        .insert([pledgeData])
+        .select(); // Optionally select the inserted row
+
+      if (insertError) {
+        console.error(
+          "Error submitting pledge to Supabase (Anonymously):",
+          insertError
+        );
+        // Provide user feedback
+        alert(
+          `Failed to submit pledge: ${
+            insertError.message || "Please try again."
+          }`
+        );
+        // Consider setting a specific error state if needed for UI
+      } else {
+        console.log(
+          "Pledge submitted successfully to Supabase (Anonymously):",
+          data
+        );
+        setSubmitSuccess(true);
+
+        // --- 4. Reset Form ---
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          pledgeAmount: (artwork.topBid + artwork.minimumIncrement).toString(),
+        });
+        setErrors({});
+
+        // --- 5. Re-fetch Pledges to Update the List ---
+        // Use the main `supabase` client instance for fetching.
+        // Fetching might require RLS policy for SELECT (e.g., `TO public` or `TO authenticated`)
+        const { data: newPledgesData, error: fetchError } = await supabase
+          .from("pledges")
+          .select("id, name, pledge_amount, created_at")
+          .eq("artwork_id", artwork.id)
+          .order("created_at", { ascending: false });
+
+        if (!fetchError && newPledgesData) {
+          setPledges(newPledgesData);
+        } else if (fetchError) {
+          console.error("Error re-fetching pledges:", fetchError);
+          // Optionally, inform the user the list might not be updated
+          // alert("Pledge submitted, but list update failed. Refresh the page.");
+        }
+      }
     } catch (error) {
-      console.error("Error submitting pledge:", error);
+      console.error("Unexpected error during pledge submission:", error);
+      alert("An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
+  // --- END UPDATED handleSubmit ---
 
   const minimumPledge = artwork.topBid + artwork.minimumIncrement;
   const pledgeIncrements = [
@@ -152,7 +245,7 @@ const ArtworkDetailClient = ({
     minimumPledge + artwork.minimumIncrement * 3,
   ];
 
-  // --- RENDER (Updated to use artwork data and Indian Rupee symbol, Pledge terminology, and new date) ---
+  // --- RENDER ---
   return (
     <>
       <style>{`
@@ -164,7 +257,7 @@ const ArtworkDetailClient = ({
         .left-column, .right-column { display: flex; flex-direction: column; gap: 1.5rem; }
         
         .header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #E5E7EB; }
-        .header-logo { font-weight: 700; font-size: 1.5rem; letter-spacing: 2px; color: #000000; } /* Black logo */
+        .header-logo { font-weight: 700; font-size: 1.5rem; letter-spacing: 2px; color: #000000; }
         .header-nav { display: none; gap: 1.5rem; }
         @media (min-width: 768px) { .header-nav { display: flex; } }
         .header-nav a { text-decoration: none; color: #4B5563; }
@@ -177,8 +270,8 @@ const ArtworkDetailClient = ({
         .artwork-info { display: flex; flex-direction: column; gap: 0.5rem; }
         .info-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .lot-number { font-size: 1.25rem; font-weight: 600; color: #000000; }
-        .artist-name { font-size: 1.25rem; font-weight: 600; color: #374151; } /* Smaller, less prominent */
-        .artwork-title { font-size: 1.75rem; font-weight: 700; color: #004276; /* Bold and blue */ display: inline-block; /* Required for animation */ animation: shimmer 2s infinite linear; background: linear-gradient(90deg, #004276, #8B5CF6, #004276); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .artist-name { font-size: 1.25rem; font-weight: 600; color: #374151; }
+        .artwork-title { font-size: 1.75rem; font-weight: 700; color: #004276; display: inline-block; animation: shimmer 2s infinite linear; background: linear-gradient(90deg, #004276, #8B5CF6, #004276); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
         
         .auction-details { border: 1px solid #E5E7EB; border-radius: 8px; }
@@ -213,7 +306,7 @@ const ArtworkDetailClient = ({
         
         .pledge-history { border-top: 1px solid #E5E7EB; padding-top: 1.5rem; }
         .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .history-item { display: flex; justify-content: space-between; padding: 0.25rem 0; }
+        .history-item { display: flex; justify-content: space-between; padding: 0.25rem 0; align-items: center; }
         .history-pledge { font-weight: 500; }
         .history-time { color: #6B7280; font-size: 0.9rem; }
         
@@ -232,11 +325,8 @@ const ArtworkDetailClient = ({
 
       <div className="page-container">
         <header className="header">
-          <div className="header-logo">Palettes of Promise</div>{" "}
-          {/* Updated logo text */}
-          <nav className="header-nav">
-            {/* Navigation links can be added here if needed */}
-          </nav>
+          <div className="header-logo">Palettes of Promise</div>
+          <nav className="header-nav"></nav>
           <div className="header-icons">
             <button onClick={() => router.push("/")}>Back to Gallery</button>
           </div>
@@ -264,43 +354,34 @@ const ArtworkDetailClient = ({
               <div className="info-header">
                 <div className="lot-number">{artwork.lotNumber}</div>
               </div>
-              {/* Order: Title (shimmering, bold, large) first, then Artist */}
               <h1 className="artwork-title">{artwork.title}</h1>
               <h2 className="artist-name">{artwork.artist}</h2>
             </div>
 
             <div className="auction-details">
               <div className="detail-row">
-                <span className="detail-label">Pledge closes</span>{" "}
-                {/* Updated label */}
-                <span className="detail-value">
-                  Oct. 31, 2025 at 12:00 AM
-                </span>{" "}
-                {/* Updated date/time */}
+                <span className="detail-label">Pledge closes</span>
+                <span className="detail-value">Oct. 31, 2025 at 12:00 AM</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Starting pledge</span>{" "}
-                {/* Updated label */}
+                <span className="detail-label">Starting pledge</span>
                 <span className="detail-value current-pledge-value">
-                  ₹{artwork.startingBid.toLocaleString()} {/* Rupee symbol */}
+                  ₹{artwork.startingBid.toLocaleString()}
                 </span>
               </div>
               <div className="detail-row">
                 <span className="detail-label">Minimum Increment</span>
                 <span className="detail-value">
-                  ₹{artwork.minimumIncrement.toLocaleString()}{" "}
-                  {/* Rupee symbol */}
+                  ₹{artwork.minimumIncrement.toLocaleString()}
                 </span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Next Minimum Pledge</span>{" "}
-                {/* Updated label */}
+                <span className="detail-label">Next Minimum Pledge</span>
                 <span className="detail-value">
                   ₹
                   {(
                     artwork.startingBid + artwork.minimumIncrement
-                  ).toLocaleString()}{" "}
-                  {/* Rupee symbol */}
+                  ).toLocaleString()}
                 </span>
               </div>
               <div className="met-status">Accepted minimum price is met</div>
@@ -328,7 +409,7 @@ const ArtworkDetailClient = ({
                       }))
                     }
                   >
-                    ₹{amount.toLocaleString()} {/* Rupee symbol */}
+                    ₹{amount.toLocaleString()}
                   </button>
                 ))}
               </div>
@@ -386,8 +467,7 @@ const ArtworkDetailClient = ({
                 <div className="form-field">
                   <label htmlFor="pledgeAmount" className="form-label">
                     Your Pledge
-                  </label>{" "}
-                  {/* Updated label */}
+                  </label>
                   <input
                     type="number"
                     id="pledgeAmount"
@@ -406,15 +486,14 @@ const ArtworkDetailClient = ({
                   className="place-pledge-btn"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Pledging..." : "Place pledge"}{" "}
-                  {/* Updated text */}
+                  {isSubmitting ? "Pledging..." : "Place pledge"}
                 </button>
                 <button
                   type="submit"
                   className="set-max-pledge-btn"
                   disabled={isSubmitting}
                 >
-                  Set max pledge {/* Updated text */}
+                  Set max pledge
                 </button>
               </div>
               {submitSuccess && (
@@ -423,69 +502,76 @@ const ArtworkDetailClient = ({
                     color: "#004276",
                     textAlign: "center",
                     fontWeight: "600",
+                    padding: "10px",
+                    backgroundColor: "#e6f4ea",
+                    borderRadius: "4px",
+                    border: "1px solid #004276",
+                    marginTop: "10px",
                   }}
                 >
-                  Pledge placed successfully! {/* Updated success message */}
+                  Thank you for your pledge!
                 </p>
               )}
             </form>
 
+            {/* --- PLEDGE HISTORY (UPDATED TO USE SUPABASE DATA) --- */}
             <div className="pledge-history">
               <div className="history-header">
-                <span style={{ fontWeight: "600" }}>Pledge history</span>{" "}
-                {/* Updated header */}
-                <span style={{ color: "#6B7280", fontSize: "0.9rem" }}>
-                  See all
-                </span>
+                <span style={{ fontWeight: "600" }}>Pledge history</span>
               </div>
-              {mockPledgeHistory.map((item) => (
-                <div key={item.id} className="history-item">
-                  <span className="history-pledge">
-                    ₹{item.pledge.toLocaleString()}
-                  </span>{" "}
-                  {/* Rupee symbol */}
-                  <span className="history-time">{item.time}</span>
-                </div>
-              ))}
+
+              {isFetchingPledges ? (
+                <p>Loading pledges...</p>
+              ) : pledges.length > 0 ? (
+                pledges.map((pledge) => (
+                  <div key={pledge.id} className="history-item">
+                    <span className="history-pledge">
+                      {pledge.name
+                        ? `${pledge.name.charAt(0)}. ${
+                            pledge.name.split(" ").pop() || ""
+                          }`
+                        : "Anonymous"}
+                    </span>
+                    <span className="history-pledge">
+                      ₹{pledge.pledge_amount.toLocaleString("en-IN")}
+                    </span>
+                    <span className="history-time">
+                      {new Date(pledge.created_at).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p>No pledges yet. Be the first!</p>
+              )}
             </div>
+            {/* --- END PLEDGE HISTORY --- */}
           </div>
         </div>
       </main>
     </>
   );
 };
+// --- END CLIENT COMPONENT ---
 
-// --- SERVER LOGIC MOVED HERE ---
-// Since we are making this a Client Component file, the server-side data fetching needs to be handled differently.
-// One common approach is to fetch data in a parent Server Component/Layout or use a Server Action for mutations.
-// However, for simplicity and to match the original request of having one file, we'll simulate fetching data client-side.
-// In a real app, you'd likely fetch this data in a parent layout or via an API route.
-
+// --- SERVER LOGIC WRAPPER ---
 export default function ArtworkDetailPageWrapper({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // --- CORRECTLY AWAIT PARAMS ---
-  // In Next.js 15, `params` is a Promise. We must `await` it.
-  // However, `await` is not allowed in the top level of a Client Component.
-  // We need to use `React.use` to unwrap the Promise.
-  // First, we need to import React.
-  const resolvedParams = React.use(params); // This unwraps the Promise
+  const resolvedParams = React.use(params);
   const { id: artworkId } = resolvedParams;
-  // --- END CORRECTLY AWAIT PARAMS ---
 
   const foundArtworkJSON = artworkData.find((art) => art.id === artworkId);
 
   if (!foundArtworkJSON) {
-    // Handle not found - perhaps redirect or show an error message
-    // For simplicity, we'll just return null or a placeholder.
-    // A better approach in a real app would be to use `notFound()` in a Server Component
-    // or handle it via a layout.
     return <div>Artwork not found</div>;
   }
 
-  // Map JSON data to the internal Artwork interface
   const artwork: Artwork = {
     id: foundArtworkJSON.id,
     lotNumber: foundArtworkJSON.lotNumber,
@@ -497,53 +583,13 @@ export default function ArtworkDetailPageWrapper({
     minimumIncrement: foundArtworkJSON.minimumIncrement,
     page: foundArtworkJSON.page,
     image: foundArtworkJSON.image,
-    topBid: foundArtworkJSON.startingBid, // Initialize top pledge
+    topBid: foundArtworkJSON.startingBid,
   };
 
-  // Generate mock pledge history based on artwork data
-  const mockPledgeHistory = generateMockPledgeHistory(
-    artwork.startingBid,
-    artwork.minimumIncrement
-  );
-
-  // Render the Client Component, passing the fetched data as props.
-  return (
-    <ArtworkDetailClient
-      artwork={artwork}
-      mockPledgeHistory={mockPledgeHistory}
-    />
-  );
+  return <ArtworkDetailClient artwork={artwork} />;
 }
-
-// Function to generate mock pledge history based on artwork data
-// Move this function outside the component or make it a standalone utility
-const generateMockPledgeHistory = (
-  startingPledge: number,
-  minimumIncrement: number,
-  count: number = 5
-): PledgeHistoryItem[] => {
-  const history: PledgeHistoryItem[] = [];
-  let currentPledge = startingPledge;
-
-  for (let i = 0; i < count; i++) {
-    const incrementToAdd = Math.floor(Math.random() * 5) + 1; // 1 to 5 increments
-    const newPledge = currentPledge + minimumIncrement * incrementToAdd;
-    currentPledge = newPledge;
-
-    const timeUnits = ["m", "h", "d"];
-    const timeUnit = timeUnits[Math.floor(Math.random() * timeUnits.length)];
-    const timeValue = Math.floor(Math.random() * 10) + 1;
-    const timeString = `${timeValue}${timeUnit} ago`;
-
-    history.push({
-      id: i + 1,
-      pledge: newPledge,
-      time: timeString,
-    });
-  }
-
-  return history.reverse();
-};
+// --- END SERVER LOGIC WRAPPER ---
 
 // Import React at the top for `React.use`
 import * as React from "react";
+// --- END IMPORTS ---
