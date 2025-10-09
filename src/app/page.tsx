@@ -265,24 +265,70 @@ export default function HomePage() {
       <main style={{ maxWidth: "100%", margin: "0 auto", padding: "0" }}>
         {/* Hero Section - Split Layout (As per screenshot) */}
         {/* Hero Section - Split Layout */}
-        <div
-          className="hero-container"
-          style={{
-            maxWidth: "1400px",
-            margin: "0 auto",
-            padding: "20px",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "20px",
-            marginBottom: "60px",
-            minHeight: "calc(100vh - 80px)",
-          }}
-        >
+        <style jsx>{`
+          .hero-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 60px;
+            min-height: calc(100vh - 80px);
+          }
+
+          .hero-content {
+            position: relative;
+            z-index: 1;
+            padding: 80px 60px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+          }
+
+          /* Mobile responsiveness */
+          @media (max-width: 768px) {
+            .hero-container {
+              grid-template-columns: 1fr;
+              gap: 16px;
+              padding: 16px;
+              min-height: auto;
+            }
+
+            .hero-content {
+              padding: 40px 24px;
+            }
+
+            .hero-heading {
+              font-size: 16px;
+              margin-bottom: 12px;
+            }
+
+            .hero-artist {
+              font-size: 22px !important;
+              margin-bottom: 6px;
+            }
+
+            .hero-title {
+              font-size: 24px !important;
+              margin-bottom: 20px;
+            }
+
+            .view-lots-btn {
+              padding: 6px 16px;
+              font-size: 11px;
+            }
+          }
+        `}</style>
+
+        <div className="hero-container">
           {/* Left Hero */}
           <div
             style={{
               position: "relative",
               overflow: "hidden",
+              borderRadius: "8px",
             }}
           >
             {heroArtworkLeft ? (
@@ -309,21 +355,9 @@ export default function HomePage() {
                 zIndex: 0,
               }}
             />
-
-            <div
-              className="hero-content"
-              style={{
-                position: "relative",
-                zIndex: 1,
-                padding: "80px 60px",
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "flex-end",
-              }}
-            >
-              {/* 👇 Added Heading */}
+            <div className="hero-content">
               <h2
+                className="hero-heading"
                 style={{
                   fontSize: "20px",
                   fontWeight: "700",
@@ -336,7 +370,6 @@ export default function HomePage() {
               >
                 Artwork With Most Pledge
               </h2>
-
               <div
                 className="hero-artist"
                 style={{
@@ -364,7 +397,6 @@ export default function HomePage() {
               >
                 {heroArtworkLeft?.title || "ARTWORK TITLE"}
               </h1>
-
               <button
                 className="view-lots-btn"
                 style={{
@@ -401,6 +433,7 @@ export default function HomePage() {
             style={{
               position: "relative",
               overflow: "hidden",
+              borderRadius: "8px",
             }}
           >
             {heroArtworkRight ? (
@@ -427,21 +460,9 @@ export default function HomePage() {
                 zIndex: 0,
               }}
             />
-
-            <div
-              className="hero-content"
-              style={{
-                position: "relative",
-                zIndex: 1,
-                padding: "80px 60px",
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "flex-end",
-              }}
-            >
-              {/* 👇 Added Heading */}
+            <div className="hero-content">
               <h2
+                className="hero-heading"
                 style={{
                   fontSize: "20px",
                   fontWeight: "700",
@@ -454,7 +475,6 @@ export default function HomePage() {
               >
                 Artwork With Highest Pledge
               </h2>
-
               <div
                 className="hero-artist"
                 style={{
@@ -482,7 +502,6 @@ export default function HomePage() {
               >
                 {heroArtworkRight?.title || "ARTWORK TITLE"}
               </h1>
-
               <button
                 className="view-lots-btn"
                 style={{
