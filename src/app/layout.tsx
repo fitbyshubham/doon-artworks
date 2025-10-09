@@ -1,5 +1,7 @@
 // src/app/layout.tsx
 import type { Metadata } from "next";
+import Footer from "@/components/layout/footer";
+import Header from "@/components/layout/header";
 
 // --- DEFAULT METADATA ---
 // Twitter section REMOVED
@@ -56,7 +58,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Header />
       <body>{children}</body>
+      <Footer />
     </html>
   );
 }
