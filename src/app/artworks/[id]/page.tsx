@@ -1,8 +1,11 @@
-// src/app/artwork/[id]/page.tsx
-// NOTE: No "use client" at the top. This file uses a Server Component that renders a Client Component.
+// src/app/artworks/[id]/page.tsx
+// IMPORTANT: "use client" MUST be the FIRST LINE in the file.
+"use client";
 
 import { notFound } from "next/navigation";
 import { artworks as artworkData } from "@/data/artworks.json";
+import { useState } from "react"; // Move useState import here, after "use client"
+import { useRouter } from "next/navigation"; // Move useRouter import here, after "use client"
 
 // --- Interfaces matching your JSON structure ---
 interface ArtworkJSON {
@@ -44,93 +47,10 @@ interface PledgeHistoryItem {
   time: string; // e.g., "X hours/days ago"
 }
 
-// --- SERVER COMPONENT ---
-// This part fetches data on the server. It must be async to handle `params`.
-// Next.js 15 requires awaiting the `params` Promise.
-export default async function ArtworkDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>; // params is a Promise in Next.js 15
-}) {
-  // --- CORRECTLY AWAIT PARAMS ---
-  // In Next.js 15, `params` is a Promise. We must `await` it to get the actual values.
-  const resolvedParams = await params;
-  const { id: artworkId } = resolvedParams;
-  // --- END CORRECTLY AWAIT PARAMS ---
-
-  const foundArtworkJSON = artworkData.find((art) => art.id === artworkId);
-
-  if (!foundArtworkJSON) {
-    // Use Next.js's built-in notFound function for 404s
-    notFound();
-  }
-
-  // Map JSON data to the internal Artwork interface
-  const artwork: Artwork = {
-    id: foundArtworkJSON.id,
-    lotNumber: foundArtworkJSON.lotNumber,
-    title: foundArtworkJSON.title,
-    artist: foundArtworkJSON.artist,
-    medium: foundArtworkJSON.medium,
-    dimensions: foundArtworkJSON.dimensions.formatted,
-    startingBid: foundArtworkJSON.startingBid,
-    minimumIncrement: foundArtworkJSON.minimumIncrement,
-    page: foundArtworkJSON.page,
-    image: foundArtworkJSON.image,
-    topBid: foundArtworkJSON.startingBid, // Initialize top pledge
-  };
-
-  // Generate mock pledge history based on artwork data
-  const mockPledgeHistory = generateMockPledgeHistory(
-    artwork.startingBid,
-    artwork.minimumIncrement
-  );
-
-  // Render the Client Component, passing the fetched data as props.
-  return (
-    <ArtworkDetailClient
-      artwork={artwork}
-      mockPledgeHistory={mockPledgeHistory}
-    />
-  );
-}
-
-// Function to generate mock pledge history based on artwork data
-const generateMockPledgeHistory = (
-  startingPledge: number,
-  minimumIncrement: number,
-  count: number = 5
-): PledgeHistoryItem[] => {
-  const history: PledgeHistoryItem[] = [];
-  let currentPledge = startingPledge;
-
-  for (let i = 0; i < count; i++) {
-    const incrementToAdd = Math.floor(Math.random() * 5) + 1; // 1 to 5 increments
-    const newPledge = currentPledge + minimumIncrement * incrementToAdd;
-    currentPledge = newPledge;
-
-    const timeUnits = ["m", "h", "d"];
-    const timeUnit = timeUnits[Math.floor(Math.random() * timeUnits.length)];
-    const timeValue = Math.floor(Math.random() * 10) + 1;
-    const timeString = `${timeValue}${timeUnit} ago`;
-
-    history.push({
-      id: i + 1,
-      pledge: newPledge,
-      time: timeString,
-    });
-  }
-
-  return history.reverse();
-};
-
 // --- CLIENT COMPONENT ---
-// This part handles interactivity (state, form). It receives data as props.
-// Marked as a Client Component
-("use client");
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+// This component handles interactivity (state, form).
+// It receives data as props.
+// It MUST be AFTER the "use client" directive.
 
 const ArtworkDetailClient = ({
   artwork,
@@ -534,3 +454,96 @@ const ArtworkDetailClient = ({
     </>
   );
 };
+
+// --- SERVER LOGIC MOVED HERE ---
+// Since we are making this a Client Component file, the server-side data fetching needs to be handled differently.
+// One common approach is to fetch data in a parent Server Component/Layout or use a Server Action for mutations.
+// However, for simplicity and to match the original request of having one file, we'll simulate fetching data client-side.
+// In a real app, you'd likely fetch this data in a parent layout or via an API route.
+
+export default function ArtworkDetailPageWrapper({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  // --- CORRECTLY AWAIT PARAMS ---
+  // In Next.js 15, `params` is a Promise. We must `await` it.
+  // However, `await` is not allowed in the top level of a Client Component.
+  // We need to use `React.use` to unwrap the Promise.
+  // First, we need to import React.
+  const resolvedParams = React.use(params); // This unwraps the Promise
+  const { id: artworkId } = resolvedParams;
+  // --- END CORRECTLY AWAIT PARAMS ---
+
+  const foundArtworkJSON = artworkData.find((art) => art.id === artworkId);
+
+  if (!foundArtworkJSON) {
+    // Handle not found - perhaps redirect or show an error message
+    // For simplicity, we'll just return null or a placeholder.
+    // A better approach in a real app would be to use `notFound()` in a Server Component
+    // or handle it via a layout.
+    return <div>Artwork not found</div>;
+  }
+
+  // Map JSON data to the internal Artwork interface
+  const artwork: Artwork = {
+    id: foundArtworkJSON.id,
+    lotNumber: foundArtworkJSON.lotNumber,
+    title: foundArtworkJSON.title,
+    artist: foundArtworkJSON.artist,
+    medium: foundArtworkJSON.medium,
+    dimensions: foundArtworkJSON.dimensions.formatted,
+    startingBid: foundArtworkJSON.startingBid,
+    minimumIncrement: foundArtworkJSON.minimumIncrement,
+    page: foundArtworkJSON.page,
+    image: foundArtworkJSON.image,
+    topBid: foundArtworkJSON.startingBid, // Initialize top pledge
+  };
+
+  // Generate mock pledge history based on artwork data
+  const mockPledgeHistory = generateMockPledgeHistory(
+    artwork.startingBid,
+    artwork.minimumIncrement
+  );
+
+  // Render the Client Component, passing the fetched data as props.
+  return (
+    <ArtworkDetailClient
+      artwork={artwork}
+      mockPledgeHistory={mockPledgeHistory}
+    />
+  );
+}
+
+// Function to generate mock pledge history based on artwork data
+// Move this function outside the component or make it a standalone utility
+const generateMockPledgeHistory = (
+  startingPledge: number,
+  minimumIncrement: number,
+  count: number = 5
+): PledgeHistoryItem[] => {
+  const history: PledgeHistoryItem[] = [];
+  let currentPledge = startingPledge;
+
+  for (let i = 0; i < count; i++) {
+    const incrementToAdd = Math.floor(Math.random() * 5) + 1; // 1 to 5 increments
+    const newPledge = currentPledge + minimumIncrement * incrementToAdd;
+    currentPledge = newPledge;
+
+    const timeUnits = ["m", "h", "d"];
+    const timeUnit = timeUnits[Math.floor(Math.random() * timeUnits.length)];
+    const timeValue = Math.floor(Math.random() * 10) + 1;
+    const timeString = `${timeValue}${timeUnit} ago`;
+
+    history.push({
+      id: i + 1,
+      pledge: newPledge,
+      time: timeString,
+    });
+  }
+
+  return history.reverse();
+};
+
+// Import React at the top for `React.use`
+import * as React from "react";
