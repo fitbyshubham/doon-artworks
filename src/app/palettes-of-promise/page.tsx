@@ -97,6 +97,12 @@ export default function ArtisticLayout() {
         {/* Signatures Section */}
         <div className="flex flex-row justify-between mt-8 gap-4">
           <div className="flex flex-col items-center w-1/2">
+            <Image
+              src="/images/cmsign.png"
+              width={150}
+              height={150}
+              alt="Picture of the author"
+            />
             <div className="text-xs text-blue-700 text-center">
               <strong>Mr Anoop Singh Bishnoi</strong>
               <br />
@@ -106,6 +112,12 @@ export default function ArtisticLayout() {
             </div>
           </div>
           <div className="flex flex-col items-center w-1/2">
+            <Image
+              src="/images/hmsign.png"
+              width={120}
+              height={120}
+              alt="Picture of the author"
+            />
             <div className="text-xs text-blue-700 text-center">
               <strong>Dr Jagpreet Singh</strong>
               <br />
