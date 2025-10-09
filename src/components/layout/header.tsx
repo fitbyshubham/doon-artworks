@@ -42,7 +42,6 @@ export default function Header() {
             </span>
           </div>
         </div>
-
         {/* Navigation Links */}
         <nav className="flex items-center space-x-8">
           {navItems.map((item) => (
@@ -55,16 +54,13 @@ export default function Header() {
             </Link>
           ))}
         </nav>
-
         {/* CTA Button */}
-        <button
-          onClick={() => {
-            // Add scroll-to-pledge or modal logic here if needed
-          }}
-          className="bg-[#CBC3BA] text-[#004276] font-bold py-2 px-6 rounded-full hover:bg-[#c2b9b0] transition-colors"
-        >
-          Make Your Pledge
-        </button>
+
+        <Link href="/#artworks-section" passHref>
+          <button className="bg-[#CBC3BA] text-[#004276] font-bold py-2 px-6 rounded-full hover:bg-[#c2b9b0] transition-colors">
+            Make Your Pledge
+          </button>
+        </Link>
       </div>
 
       {/* Mobile Header */}

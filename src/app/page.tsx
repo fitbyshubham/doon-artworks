@@ -828,7 +828,7 @@ export default function HomePage() {
                 number: "2",
                 title: "View the Gallery",
                 isSpecial: false,
-                path: "/gallery",
+                path: "#artworks-section",
               },
               {
                 number: "3",
