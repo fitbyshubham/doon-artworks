@@ -114,31 +114,22 @@ export default function Footer() {
               <h4 className="font-bold text-[#004276] tracking-wide">
                 About Us
               </h4>
-              <a href="/about" className="hover:underline text-[#004276]">
+              <a
+                href="/palettes-of-promise"
+                className="hover:underline text-[#004276]"
+              >
                 Mission
-              </a>
-              <a href="/team" className="hover:underline text-[#004276]">
-                Team
-              </a>
-              <a href="/newsletter" className="hover:underline text-[#004276]">
-                Newsletter
               </a>
             </div>
             <div className="flex flex-col items-center space-y-3">
               <h4 className="font-bold text-[#004276] tracking-wide">
-                Support
+                Artists
               </h4>
-              <a href="/contact" className="hover:underline text-[#004276]">
-                Contact
-              </a>
               <a
-                href="/refund-policy"
+                href="/about-artists"
                 className="hover:underline text-[#004276]"
               >
-                Refund Policy
-              </a>
-              <a href="/faq" className="hover:underline text-[#004276]">
-                FAQ’s
+                View All Artists
               </a>
             </div>
           </div>
