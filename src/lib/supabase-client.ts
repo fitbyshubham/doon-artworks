@@ -1,15 +1,32 @@
 // src/lib/supabase-client.ts
-// NOTE: This file must use the @supabase/ssr package for Next.js compatibility.
-import { createBrowserClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 
-// This function creates a client configured to manage cookies correctly
-// for the Next.js App Router, ensuring session persistence.
-const createSupabaseBrowserClient = () =>
-  createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    // The `createBrowserClient` helper automatically manages cookies
-    // and session storage, resolving your persistence issue.
-  );
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export { createSupabaseBrowserClient };
+// Default client (with auth persistence)
+export const createSupabaseBrowserClient = () => {
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  });
+};
+
+// ✅ NEW: Anonymous-only client (no session persistence)
+export const createAnonymousSupabaseClient = () => {
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: false, // 🔒 No session storage
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+    global: {
+      headers: {
+        // Optional: explicitly prevent auth header if no session
+      },
+    },
+  });
+};

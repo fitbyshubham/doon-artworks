@@ -368,7 +368,7 @@ export default function HomePage() {
                   opacity: 0.9,
                 }}
               >
-                Artwork With Most Pledge
+                Artwork With Most Pledges
               </h2>
               <div
                 className="hero-artist"

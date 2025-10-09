@@ -2,11 +2,11 @@
 // IMPORTANT: "use client" MUST be the FIRST LINE in the file.
 "use client";
 
-import { notFound } from "next/navigation";
 import { artworks as artworkData } from "@/data/artworks.json";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createSupabaseBrowserClient } from "@/lib/supabase-client";
+import { createAnonymousSupabaseClient } from "@/lib/supabase-client";
+import * as React from "react";
 
 // --- Interfaces matching your JSON structure ---
 interface ArtworkJSON {
@@ -20,33 +20,31 @@ interface ArtworkJSON {
     width: string;
     formatted: string;
   };
-  startingBid: number; // Represents starting pledge
-  minimumIncrement: number; // Represents minimum pledge increment
+  startingBid: number;
+  minimumIncrement: number;
   page: number;
   image: string;
 }
 
-// Internal interface for the component
 interface Artwork {
   id: string;
   lotNumber: string;
   title: string;
   artist: string;
   medium: string;
-  dimensions: string; // Using the formatted string
-  startingBid: number; // Starting pledge amount
-  minimumIncrement: number; // Minimum pledge increment
+  dimensions: string;
+  startingBid: number;
+  minimumIncrement: number;
   page: number;
   image: string;
-  topBid: number; // Represents current top pledge (starts as startingBid)
+  topBid: number;
 }
 
-// Interface for pledge items fetched from Supabase
 interface SupabasePledge {
-  id: string; // UUID from Supabase
+  id: string;
   name: string;
   pledge_amount: number;
-  created_at: string; // ISO string
+  created_at: string;
 }
 
 // --- CLIENT COMPONENT ---
@@ -62,15 +60,13 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [imageZoom, setImageZoom] = useState(false);
-
-  // --- NEW STATES FOR SUPABASE INTEGRATION ---
   const [pledges, setPledges] = useState<SupabasePledge[]>([]);
   const [isFetchingPledges, setIsFetchingPledges] = useState(true);
-  // --- END NEW STATES ---
 
-  // --- INITIALIZE SUPABASE CLIENT ---
-  const supabase = createSupabaseBrowserClient();
-  // --- END INITIALIZE SUPABASE CLIENT ---
+  // ✅ Memoized anonymous client for stable useEffect dependency
+  const supabase = React.useMemo(() => {
+    return createAnonymousSupabaseClient();
+  }, []);
 
   // --- FETCH PLEDGES FROM SUPABASE ---
   useEffect(() => {
@@ -93,7 +89,6 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
 
     fetchPledges();
   }, [supabase, artwork.id]);
-  // --- END FETCH PLEDGES ---
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -141,17 +136,16 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
     }
   };
 
-  // Inside ArtworkDetailClient component
-
-  // --- UPDATE YOUR handleSubmit FUNCTION ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
     setIsSubmitting(true);
     setSubmitSuccess(false);
 
+    // Use a fresh anonymous client for insert (no auth header)
+    const anonSupabase = createAnonymousSupabaseClient();
+
     try {
-      // --- 1. Prepare Pledge Data ---
       const pledgeData = {
         artwork_id: artwork.id,
         name: formData.name,
@@ -160,82 +154,45 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
         pledge_amount: parseFloat(formData.pledgeAmount),
       };
 
-      console.log(
-        "Preparing to submit pledge data to Supabase (Anonymously):",
-        pledgeData
-      );
+      const { error } = await anonSupabase.from("pledges").insert([pledgeData]);
 
-      // --- 2. Create a Dedicated Anonymous Supabase Client Instance ---
-      // This ensures the operation uses the ANON key only, ignoring any session token.
-      // It's a robust way to enforce public access for this specific write operation.
-      const anonSupabaseClient = createSupabaseBrowserClient(); // Use your existing client creator
-      // Note: The client created by `createSupabaseBrowserClient` using `@supabase/ssr`
-      // and the ANON key from env vars is designed to be anonymous-first.
-      // However, if a session cookie exists, it might still be used.
-      // To be absolutely sure, we can explicitly clear the session for this client instance.
-      // While `@supabase/ssr` handles much of this, explicitly signing out the temp client
-      // guarantees no session is used for the insert.
-      await anonSupabaseClient.auth.signOut(); // Force sign out to ensure anonymity
+      if (error) throw error;
 
-      // --- 3. Submit to Supabase USING the Anonymous Client ---
-      const { data, error: insertError } = await anonSupabaseClient // <-- Use anon client
+      // ✅ Reset form with complete object
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        pledgeAmount: (artwork.topBid + artwork.minimumIncrement).toString(),
+      });
+      setErrors({});
+      setSubmitSuccess(true);
+
+      // ✅ Re-fetch pledges and ALWAYS update state (even if empty)
+      const { data: newPledges, error: fetchError } = await supabase
         .from("pledges")
-        .insert([pledgeData])
-        .select(); // Optionally select the inserted row
+        .select("id, name, pledge_amount, created_at")
+        .eq("artwork_id", artwork.id)
+        .order("created_at", { ascending: false });
 
-      if (insertError) {
-        console.error(
-          "Error submitting pledge to Supabase (Anonymously):",
-          insertError
-        );
-        // Provide user feedback
-        alert(
-          `Failed to submit pledge: ${
-            insertError.message || "Please try again."
-          }`
-        );
-        // Consider setting a specific error state if needed for UI
+      if (fetchError) {
+        console.error("Error re-fetching pledges:", fetchError);
+        // Still update with empty array to clear "loading" state
+        setPledges([]);
       } else {
-        console.log(
-          "Pledge submitted successfully to Supabase (Anonymously):",
-          data
-        );
-        setSubmitSuccess(true);
-
-        // --- 4. Reset Form ---
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          pledgeAmount: (artwork.topBid + artwork.minimumIncrement).toString(),
-        });
-        setErrors({});
-
-        // --- 5. Re-fetch Pledges to Update the List ---
-        // Use the main `supabase` client instance for fetching.
-        // Fetching might require RLS policy for SELECT (e.g., `TO public` or `TO authenticated`)
-        const { data: newPledgesData, error: fetchError } = await supabase
-          .from("pledges")
-          .select("id, name, pledge_amount, created_at")
-          .eq("artwork_id", artwork.id)
-          .order("created_at", { ascending: false });
-
-        if (!fetchError && newPledgesData) {
-          setPledges(newPledgesData);
-        } else if (fetchError) {
-          console.error("Error re-fetching pledges:", fetchError);
-          // Optionally, inform the user the list might not be updated
-          // alert("Pledge submitted, but list update failed. Refresh the page.");
-        }
+        setPledges(newPledges || []);
       }
     } catch (error) {
       console.error("Unexpected error during pledge submission:", error);
-      alert("An unexpected error occurred. Please try again.");
+      const message =
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred. Please try again.";
+      alert(`Failed to submit pledge: ${message}`);
     } finally {
       setIsSubmitting(false);
     }
   };
-  // --- END UPDATED handleSubmit ---
 
   const minimumPledge = artwork.topBid + artwork.minimumIncrement;
   const pledgeIncrements = [
@@ -245,7 +202,6 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
     minimumPledge + artwork.minimumIncrement * 3,
   ];
 
-  // --- RENDER ---
   return (
     <>
       <style>{`
@@ -514,7 +470,6 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
               )}
             </form>
 
-            {/* --- PLEDGE HISTORY (UPDATED TO USE SUPABASE DATA) --- */}
             <div className="pledge-history">
               <div className="history-header">
                 <span style={{ fontWeight: "600" }}>Pledge history</span>
@@ -523,39 +478,36 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
               {isFetchingPledges ? (
                 <p>Loading pledges...</p>
               ) : pledges.length > 0 ? (
-                pledges.map((pledge) => (
-                  <div key={pledge.id} className="history-item">
-                    <span className="history-pledge">
-                      {pledge.name
-                        ? `${pledge.name.charAt(0)}. ${
-                            pledge.name.split(" ").pop() || ""
-                          }`
-                        : "Anonymous"}
-                    </span>
-                    <span className="history-pledge">
-                      ₹{pledge.pledge_amount.toLocaleString("en-IN")}
-                    </span>
-                    <span className="history-time">
-                      {new Date(pledge.created_at).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </div>
-                ))
+                <>
+                  {pledges.map((pledge, index) => (
+                    <div key={pledge.id} className="history-item">
+                      <span className="history-pledge">{index + 1}.</span>
+                      <span className="history-time">
+                        {new Date(pledge.created_at).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          }
+                        )}
+                      </span>
+                      <span className="history-pledge">
+                        ₹{pledge.pledge_amount.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  ))}
+                </>
               ) : (
                 <p>No pledges yet. Be the first!</p>
               )}
             </div>
-            {/* --- END PLEDGE HISTORY --- */}
           </div>
         </div>
       </main>
     </>
   );
 };
-// --- END CLIENT COMPONENT ---
 
 // --- SERVER LOGIC WRAPPER ---
 export default function ArtworkDetailPageWrapper({
@@ -588,8 +540,3 @@ export default function ArtworkDetailPageWrapper({
 
   return <ArtworkDetailClient artwork={artwork} />;
 }
-// --- END SERVER LOGIC WRAPPER ---
-
-// Import React at the top for `React.use`
-import * as React from "react";
-// --- END IMPORTS ---
