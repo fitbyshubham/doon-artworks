@@ -591,20 +591,6 @@ export default function HomePage() {
             >
               Artworks Gallery
             </h2>
-            <a
-              href="#"
-              className="view-all-link"
-              style={{
-                fontSize: "14px",
-                color: "#666666",
-                textDecoration: "none",
-                transition: "color 0.3s ease",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#000000")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#666666")}
-            >
-              View all
-            </a>
           </div>
 
           <div
