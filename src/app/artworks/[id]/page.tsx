@@ -3,7 +3,7 @@
 "use client";
 
 import { artworks as artworkData } from "@/data/artworks.json";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createAnonymousSupabaseClient } from "@/lib/supabase-client";
 import * as React from "react";
@@ -37,7 +37,7 @@ interface Artwork {
   minimumIncrement: number;
   page: number;
   image: string;
-  topBid: number;
+  // topBid is no longer needed as a static prop from JSON
 }
 
 interface SupabasePledge {
@@ -54,7 +54,7 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
     name: "",
     email: "",
     phone: "",
-    pledgeAmount: (artwork.topBid + artwork.minimumIncrement).toString(),
+    pledgeAmount: artwork.startingBid.toString(), // Initialize with starting bid
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,10 +63,34 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
   const [pledges, setPledges] = useState<SupabasePledge[]>([]);
   const [isFetchingPledges, setIsFetchingPledges] = useState(true);
 
-  // ✅ Memoized anonymous client for stable useEffect dependency
-  const supabase = React.useMemo(() => {
+  // Memoized anonymous client for stable useEffect dependency
+  const supabase = useMemo(() => {
     return createAnonymousSupabaseClient();
   }, []);
+
+  // Calculate the highest bid amount from pledges fetched from Supabase
+  const highestPledgeAmount = useMemo(() => {
+    if (pledges.length === 0) {
+      return artwork.startingBid; // Use starting bid if no pledges exist
+    }
+    // Find the maximum pledge_amount in the pledges array
+    return Math.max(...pledges.map((pledge) => pledge.pledge_amount));
+  }, [pledges, artwork.startingBid]);
+
+  // Calculate the next minimum pledge based on the highest pledge found
+  const minimumPledge = highestPledgeAmount + artwork.minimumIncrement;
+
+  // Update the form's pledgeAmount whenever the calculated minimumPledge changes
+  // This happens when pledges are fetched initially or after a new pledge is submitted and re-fetched
+  useEffect(() => {
+    // Only update if not fetching and pledges have been loaded at least once
+    if (!isFetchingPledges) {
+      setFormData((prev) => ({
+        ...prev,
+        pledgeAmount: minimumPledge.toString(),
+      }));
+    }
+  }, [minimumPledge, isFetchingPledges]);
 
   // --- FETCH PLEDGES FROM SUPABASE ---
   useEffect(() => {
@@ -76,7 +100,7 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
         .from("pledges")
         .select("id, name, pledge_amount, created_at")
         .eq("artwork_id", artwork.id)
-        .order("created_at", { ascending: false });
+        .order("pledge_amount", { ascending: false }); // Order by amount descending to easily find max
 
       if (error) {
         console.error("Error fetching pledges from Supabase:", error);
@@ -111,10 +135,9 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
       const pledgeAmount = parseFloat(formData.pledgeAmount);
       if (isNaN(pledgeAmount)) {
         newErrors.pledgeAmount = "Please enter a valid amount";
-      } else if (pledgeAmount < artwork.topBid + artwork.minimumIncrement) {
-        newErrors.pledgeAmount = `Pledge must be at least ₹${(
-          artwork.topBid + artwork.minimumIncrement
-        ).toLocaleString()}`;
+      } else if (pledgeAmount < minimumPledge) {
+        // Validate against the dynamic minimumPledge
+        newErrors.pledgeAmount = `Pledge must be at least ₹${minimumPledge.toLocaleString()}`;
       }
     }
     setErrors(newErrors);
@@ -158,30 +181,31 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
 
       if (error) throw error;
 
-      // ✅ Reset form with complete object
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        pledgeAmount: (artwork.topBid + artwork.minimumIncrement).toString(),
-      });
-      setErrors({});
       setSubmitSuccess(true);
 
-      // ✅ Re-fetch pledges and ALWAYS update state (even if empty)
-      const { data: newPledges, error: fetchError } = await supabase
+      // Re-fetch pledges to get the latest data and update the UI accordingly
+      const reFetchResult = await supabase
         .from("pledges")
         .select("id, name, pledge_amount, created_at")
         .eq("artwork_id", artwork.id)
-        .order("created_at", { ascending: false });
+        .order("pledge_amount", { ascending: false });
 
-      if (fetchError) {
-        console.error("Error re-fetching pledges:", fetchError);
-        // Still update with empty array to clear "loading" state
+      if (reFetchResult.error) {
+        console.error("Error re-fetching pledges:", reFetchResult.error);
+        // Still update with empty array to clear "loading" state if error
         setPledges([]);
       } else {
-        setPledges(newPledges || []);
+        setPledges(reFetchResult.data || []);
       }
+
+      // Reset personal details after successful submission
+      // The pledgeAmount will be reset by the useEffect that listens to minimumPledge
+      setFormData((prev) => ({
+        name: "",
+        email: "",
+        phone: "",
+        pledgeAmount: prev.pledgeAmount, // Keep temporarily, useEffect handles update
+      }));
     } catch (error) {
       console.error("Unexpected error during pledge submission:", error);
       const message =
@@ -194,7 +218,7 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
     }
   };
 
-  const minimumPledge = artwork.topBid + artwork.minimumIncrement;
+  // Calculate the predefined pledge increments based on the dynamic minimumPledge
   const pledgeIncrements = [
     minimumPledge,
     minimumPledge + artwork.minimumIncrement,
@@ -334,10 +358,8 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
               <div className="detail-row">
                 <span className="detail-label">Next Minimum Pledge</span>
                 <span className="detail-value">
-                  ₹
-                  {(
-                    artwork.startingBid + artwork.minimumIncrement
-                  ).toLocaleString()}
+                  ₹{minimumPledge.toLocaleString()}{" "}
+                  {/* Display the dynamic minimumPledge */}
                 </span>
               </div>
               <div className="met-status">Accepted minimum price is met</div>
@@ -431,7 +453,7 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
                     value={formData.pledgeAmount}
                     onChange={handleInputChange}
                     className="form-input"
-                    min={minimumPledge}
+                    min={minimumPledge} // Use the dynamic minimumPledge
                   />
                   <div className="error-text">{errors.pledgeAmount}</div>
                 </div>
@@ -445,11 +467,17 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
                   {isSubmitting ? "Pledging..." : "Place pledge"}
                 </button>
                 <button
-                  type="submit"
+                  type="button" // Changed to button to prevent form submission
                   className="set-max-pledge-btn"
                   disabled={isSubmitting}
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      pledgeAmount: minimumPledge.toString(),
+                    }))
+                  }
                 >
-                  Set max pledge
+                  Set to Minimum {/* Renamed the button */}
                 </button>
               </div>
               {submitSuccess && (
@@ -524,6 +552,7 @@ export default function ArtworkDetailPageWrapper({
     return <div>Artwork not found</div>;
   }
 
+  // Map JSON data to the Artwork interface (topBid is no longer used here)
   const artwork: Artwork = {
     id: foundArtworkJSON.id,
     lotNumber: foundArtworkJSON.lotNumber,
@@ -535,7 +564,7 @@ export default function ArtworkDetailPageWrapper({
     minimumIncrement: foundArtworkJSON.minimumIncrement,
     page: foundArtworkJSON.page,
     image: foundArtworkJSON.image,
-    topBid: foundArtworkJSON.startingBid,
+    // topBid is removed from the Artwork interface and mapping
   };
 
   return <ArtworkDetailClient artwork={artwork} />;
