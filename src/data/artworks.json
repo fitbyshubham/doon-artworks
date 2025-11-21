@@ -14,7 +14,8 @@
       "startingBid": 250000,
       "minimumIncrement": 25000,
       "page": 4,
-      "image": "/images/1.jpeg"
+      "image": "/images/1.jpeg",
+      "isBidded": true
     },
     {
       "id": "02",
@@ -30,7 +31,8 @@
       "startingBid": 70000,
       "minimumIncrement": 10000,
       "page": 5,
-      "image": "/images/2.jpeg"
+      "image": "/images/2.jpeg",
+      "isBidded": true
     },
     {
       "id": "03",
@@ -46,7 +48,8 @@
       "startingBid": 55000,
       "minimumIncrement": 10000,
       "page": 6,
-      "image": "/images/3.jpeg"
+      "image": "/images/3.jpeg",
+      "isBidded": false
     },
     {
       "id": "04",
@@ -62,7 +65,8 @@
       "startingBid": 450000,
       "minimumIncrement": 25000,
       "page": 7,
-      "image": "/images/4.jpeg"
+      "image": "/images/4.jpeg",
+      "isBidded": true
     },
     {
       "id": "05",
@@ -78,7 +82,8 @@
       "startingBid": 350000,
       "minimumIncrement": 25000,
       "page": 8,
-      "image": "/images/5.jpeg"
+      "image": "/images/5.jpeg",
+      "isBidded": true
     },
     {
       "id": "06",
@@ -94,7 +99,8 @@
       "startingBid": 60000,
       "minimumIncrement": 25000,
       "page": 9,
-      "image": "/images/6.jpeg"
+      "image": "/images/6.jpeg",
+      "isBidded": false
     },
     {
       "id": "07",
@@ -110,7 +116,8 @@
       "startingBid": 550000,
       "minimumIncrement": 50000,
       "page": 10,
-      "image": "/images/7.jpeg"
+      "image": "/images/7.jpeg",
+      "isBidded": false
     },
     {
       "id": "08",
@@ -126,7 +133,8 @@
       "startingBid": 350000,
       "minimumIncrement": 30000,
       "page": 11,
-      "image": "/images/8.png"
+      "image": "/images/8.png",
+      "isBidded": false
     },
     {
       "id": "09",
@@ -142,7 +150,8 @@
       "startingBid": 1200000,
       "minimumIncrement": 50000,
       "page": 12,
-      "image": "/images/9.jpeg"
+      "image": "/images/9.jpeg",
+      "isBidded": false
     },
     {
       "id": "10",
@@ -158,7 +167,8 @@
       "startingBid": 55000,
       "minimumIncrement": 10000,
       "page": 13,
-      "image": "/images/10.jpeg"
+      "image": "/images/10.jpeg",
+      "isBidded": false
     },
     {
       "id": "11",
@@ -172,7 +182,8 @@
       "startingBid": 250000,
       "minimumIncrement": 25000,
       "page": 14,
-      "image": "/images/11.jpeg"
+      "image": "/images/11.jpeg",
+      "isBidded": false
     },
     {
       "id": "12",
@@ -188,7 +199,8 @@
       "startingBid": 30000,
       "minimumIncrement": 10000,
       "page": 15,
-      "image": "/images/12.jpeg"
+      "image": "/images/12.jpeg",
+      "isBidded": true
     },
     {
       "id": "13",
@@ -204,7 +216,8 @@
       "startingBid": 125000,
       "minimumIncrement": 20000,
       "page": 16,
-      "image": "/images/13.jpeg"
+      "image": "/images/13.jpeg",
+      "isBidded": false
     },
     {
       "id": "14",
@@ -220,7 +233,8 @@
       "startingBid": 225000,
       "minimumIncrement": 25000,
       "page": 17,
-      "image": "/images/14.jpeg"
+      "image": "/images/14.jpeg",
+      "isBidded": false
     },
     {
       "id": "15",
@@ -236,7 +250,8 @@
       "startingBid": 200000,
       "minimumIncrement": 25000,
       "page": 18,
-      "image": "/images/15.jpeg"
+      "image": "/images/15.jpeg",
+      "isBidded": false
     },
     {
       "id": "16",
@@ -252,7 +267,8 @@
       "startingBid": 325000,
       "minimumIncrement": 25000,
       "page": 19,
-      "image": "/images/16.jpeg"
+      "image": "/images/16.jpeg",
+      "isBidded": false
     },
     {
       "id": "17",
@@ -268,7 +284,8 @@
       "startingBid": 400000,
       "minimumIncrement": 25000,
       "page": 20,
-      "image": "/images/17.jpeg"
+      "image": "/images/17.jpeg",
+      "isBidded": false
     },
     {
       "id": "18",
@@ -284,7 +301,8 @@
       "startingBid": 75000,
       "minimumIncrement": 20000,
       "page": 21,
-      "image": "/images/18.jpeg"
+      "image": "/images/18.jpeg",
+      "isBidded": false
     },
     {
       "id": "19",
@@ -300,7 +318,8 @@
       "startingBid": 250000,
       "minimumIncrement": 20000,
       "page": 22,
-      "image": "/images/19.jpeg"
+      "image": "/images/19.jpeg",
+      "isBidded": false
     },
     {
       "id": "20",
@@ -316,7 +335,8 @@
       "startingBid": 220000,
       "minimumIncrement": 25000,
       "page": 23,
-      "image": "/images/20.jpeg"
+      "image": "/images/20.jpeg",
+      "isBidded": false
     },
     {
       "id": "21",
@@ -332,7 +352,8 @@
       "startingBid": 120000,
       "minimumIncrement": 20000,
       "page": 24,
-      "image": "/images/21.jpeg"
+      "image": "/images/21.jpeg",
+      "isBidded": false
     },
     {
       "id": "22",
@@ -348,7 +369,8 @@
       "startingBid": 180000,
       "minimumIncrement": 20000,
       "page": 25,
-      "image": "/images/22.jpeg"
+      "image": "/images/22.jpeg",
+      "isBidded": false
     },
     {
       "id": "23",
@@ -364,7 +386,8 @@
       "startingBid": 55000,
       "minimumIncrement": 10000,
       "page": 26,
-      "image": "/images/23.jpeg"
+      "image": "/images/23.jpeg",
+      "isBidded": true
     },
     {
       "id": "24",
@@ -380,7 +403,8 @@
       "startingBid": 500000,
       "minimumIncrement": 50000,
       "page": 27,
-      "image": "/images/24.jpeg"
+      "image": "/images/24.jpeg",
+      "isBidded": false
     },
     {
       "id": "25",
@@ -396,7 +420,8 @@
       "startingBid": 75000,
       "minimumIncrement": 20000,
       "page": 28,
-      "image": "/images/25.jpeg"
+      "image": "/images/25.jpeg",
+      "isBidded": false
     },
     {
       "id": "26",
@@ -412,7 +437,8 @@
       "startingBid": 450000,
       "minimumIncrement": 50000,
       "page": 29,
-      "image": "/images/26.jpeg"
+      "image": "/images/26.jpeg",
+      "isBidded": false
     },
     {
       "id": "27",
@@ -428,7 +454,8 @@
       "startingBid": 150000,
       "minimumIncrement": 25000,
       "page": 30,
-      "image": "/images/27.jpeg"
+      "image": "/images/27.jpeg",
+      "isBidded": true
     },
     {
       "id": "28",
@@ -444,7 +471,8 @@
       "startingBid": 55000,
       "minimumIncrement": 10000,
       "page": 31,
-      "image": "/images/28.jpeg"
+      "image": "/images/28.jpeg",
+      "isBidded": true
     },
     {
       "id": "29",
@@ -460,7 +488,8 @@
       "startingBid": 400000,
       "minimumIncrement": 25000,
       "page": 32,
-      "image": "/images/29.jpeg"
+      "image": "/images/29.jpeg",
+      "isBidded": false
     }
   ]
 }

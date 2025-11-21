@@ -1,15 +1,10 @@
-// src/app/page.tsx
-// IMPORTANT: "use client" MUST be the FIRST LINE in the file.
 "use client";
-
+import * as React from "react";
 import { artworks as artworkData } from "@/data/artworks.json";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createAnonymousSupabaseClient } from "@/lib/supabase-client";
-import Link from "next/link"; // Import Link from next/link
-import * as React from "react";
 
-// --- Interfaces ---
 interface ArtworkJSON {
   id: string;
   lotNumber: string;
@@ -25,6 +20,7 @@ interface ArtworkJSON {
   minimumIncrement: number;
   page: number;
   image: string;
+  isBidded: boolean; // Add the new field
 }
 
 interface Artwork {
@@ -38,6 +34,7 @@ interface Artwork {
   minimumIncrement: number;
   page: number;
   image: string;
+  isBidded: boolean; // Add the new field
 }
 
 interface SupabasePledge {
@@ -45,21 +42,18 @@ interface SupabasePledge {
   name: string;
   pledge_amount: number;
   created_at: string;
-  artwork_id: string; // Add this to link pledges to artworks
+  artwork_id: string;
 }
 
 const HomePage = () => {
   const router = useRouter();
-  // State to hold fetched pledges for all artworks
   const [allPledges, setAllPledges] = useState<SupabasePledge[]>([]);
   const [isFetchingAllPledges, setIsFetchingAllPledges] = useState(true);
 
-  // Memoized anonymous client
   const supabase = useMemo(() => {
     return createAnonymousSupabaseClient();
   }, []);
 
-  // Fetch pledges for *all* artworks
   useEffect(() => {
     const fetchAllPledges = async () => {
       setIsFetchingAllPledges(true);
@@ -79,10 +73,8 @@ const HomePage = () => {
     fetchAllPledges();
   }, [supabase]);
 
-  // Calculate the effective next minimum pledge for each artwork based on its pledges
   const artworksWithEffectiveMin = useMemo(() => {
     if (isFetchingAllPledges) {
-      // If pledges are still loading, use the static starting bid
       return artworkData.map((art) => ({
         id: art.id,
         lotNumber: art.lotNumber,
@@ -94,27 +86,31 @@ const HomePage = () => {
         minimumIncrement: art.minimumIncrement,
         page: art.page,
         image: art.image,
-        effectiveNextMinPledge: art.startingBid, // Use starting bid while loading
+        isBidded: art.isBidded, // Include the new field
+        effectiveNextMinPledge: art.startingBid,
       }));
     }
 
     return artworkData.map((art) => {
-      // Find pledges for the current artwork
-      const artPledges = allPledges.filter(
-        (pledge) => pledge.artwork_id === art.id
-      );
+      // Check if artwork is already bid on
+      const isBidded = art.isBidded;
 
-      let highestPledgeForArtwork = art.startingBid;
-      if (artPledges.length > 0) {
-        // Find the maximum pledge amount for this specific artwork
-        highestPledgeForArtwork = Math.max(
-          ...artPledges.map((pledge) => pledge.pledge_amount)
+      // Calculate effective minimum only if not bidded
+      let effectiveNextMinPledge = art.startingBid;
+      if (!isBidded) {
+        const artPledges = allPledges.filter(
+          (pledge) => pledge.artwork_id === art.id
         );
-      }
 
-      // Calculate the effective next minimum pledge
-      const effectiveNextMinPledge =
-        highestPledgeForArtwork + art.minimumIncrement;
+        let highestPledgeForArtwork = art.startingBid;
+        if (artPledges.length > 0) {
+          highestPledgeForArtwork = Math.max(
+            ...artPledges.map((pledge) => pledge.pledge_amount)
+          );
+        }
+
+        effectiveNextMinPledge = highestPledgeForArtwork + art.minimumIncrement;
+      }
 
       return {
         id: art.id,
@@ -127,7 +123,8 @@ const HomePage = () => {
         minimumIncrement: art.minimumIncrement,
         page: art.page,
         image: art.image,
-        effectiveNextMinPledge, // Add the calculated effective minimum
+        isBidded, // Include the new field
+        effectiveNextMinPledge, // Will be starting bid if bidded, otherwise calculated
       };
     });
   }, [artworkData, allPledges, isFetchingAllPledges]);
@@ -146,7 +143,7 @@ const HomePage = () => {
         .header-logo { font-weight: 700; font-size: 1.5rem; letter-spacing: 2px; color: #000000; }
         .header-nav { display: none; gap: 1.5rem; }
         @media (min-width: 768px) { .header-nav { display: flex; } }
-        .header-nav a { text-decoration: none; color: #4B5563; } /* This style targets the Link component too */
+        .header-nav a { text-decoration: none; color: #4B5563; }
         .header-icons { display: flex; gap: 1rem; }
         .header-icons button { background: none; border: 1px solid #D1D5DB; border-radius: 4px; padding: 0.5rem 1rem; cursor: pointer; font-size: 0.9rem; }
 
@@ -167,6 +164,8 @@ const HomePage = () => {
         .card-bid-info { display: flex; justify-content: space-between; margin-top: 0.5rem; }
         .bid-label { font-size: 0.75rem; color: #6B7280; }
         .bid-value { font-size: 0.875rem; font-weight: 600; color: #004276; }
+        .status-badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.5rem; background-color: #F3F4F6; color: #4B5563; }
+        .status-promised { background-color: #FEF2F2; color: #DC2626; }
 
         .loading-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #f8f9fa; color: #333; }
         .spinner { width: 50px; height: 50px; border: 3px solid rgba(0,0,0,0.1); border-top-color: #111; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
@@ -174,25 +173,6 @@ const HomePage = () => {
       `}</style>
 
       <div className="page-container">
-        <header className="header">
-          <div className="header-logo">
-            <Link href="/" className="logo-link">
-              Palettes of Promise
-            </Link>{" "}
-            {/* Use Link for the logo */}
-          </div>
-          <nav className="header-nav">
-            <Link href="/">Home</Link> {/* Use Link for Home */}
-            <Link href="/about">About</Link> {/* Use Link for About */}
-            <Link href="/contact">Contact</Link> {/* Use Link for Contact */}
-          </nav>
-          <div className="header-icons">
-            <button onClick={() => console.log("Viewing Cart")}>
-              Cart (0)
-            </button>
-          </div>
-        </header>
-
         <section className="hero">
           <h1>Discover Extraordinary Art</h1>
           <p>
@@ -228,20 +208,25 @@ const HomePage = () => {
                     <div className="card-lot-number">{artwork.lotNumber}</div>
                     <h3 className="card-title">{artwork.title}</h3>
                     <div className="card-artist">{artwork.artist}</div>
-                    <div className="card-bid-info">
-                      <div>
-                        <div className="bid-label">Next Minimum Pledge</div>
-                        <div className="bid-value">
-                          ₹{artwork.effectiveNextMinPledge.toLocaleString()}{" "}
-                          {/* Display the calculated effective minimum */}
+
+                    {/* Status badge for bidded artworks */}
+                    {artwork.isBidded && (
+                      <div className="status-badge status-promised">
+                        Promised
+                      </div>
+                    )}
+
+                    {/* Bid info section - only show if not bidded */}
+                    {!artwork.isBidded && (
+                      <div className="card-bid-info">
+                        <div>
+                          <div className="bid-label">Next Minimum Pledge</div>
+                          <div className="bid-value">
+                            ₹{artwork.effectiveNextMinPledge.toLocaleString()}
+                          </div>
                         </div>
                       </div>
-                      {/* Optionally, you could also show the starting bid */}
-                      {/* <div>
-                        <div className="bid-label">Starting</div>
-                        <div className="bid-value">₹{artwork.startingBid.toLocaleString()}</div>
-                      </div> */}
-                    </div>
+                    )}
                   </div>
                 </div>
               ))}

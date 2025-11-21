@@ -341,7 +341,7 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
             <div className="auction-details">
               <div className="detail-row">
                 <span className="detail-label">Pledge closes</span>
-                <span className="detail-value">Oct. 31, 2025 at 12:00 AM</span>
+                <span className="detail-value">Dec. 31, 2025 at 12:00 AM</span>
               </div>
               <div className="detail-row">
                 <span className="detail-label">Starting pledge</span>
