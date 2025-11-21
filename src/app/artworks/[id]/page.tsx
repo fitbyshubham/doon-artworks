@@ -24,6 +24,7 @@ interface ArtworkJSON {
   minimumIncrement: number;
   page: number;
   image: string;
+  isBidded: boolean; // Add the new field
 }
 
 interface Artwork {
@@ -37,7 +38,7 @@ interface Artwork {
   minimumIncrement: number;
   page: number;
   image: string;
-  // topBid is no longer needed as a static prop from JSON
+  isBidded: boolean; // Add the new field
 }
 
 interface SupabasePledge {
@@ -84,13 +85,13 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
   // This happens when pledges are fetched initially or after a new pledge is submitted and re-fetched
   useEffect(() => {
     // Only update if not fetching and pledges have been loaded at least once
-    if (!isFetchingPledges) {
+    if (!isFetchingPledges && !artwork.isBidded) {
       setFormData((prev) => ({
         ...prev,
         pledgeAmount: minimumPledge.toString(),
       }));
     }
-  }, [minimumPledge, isFetchingPledges]);
+  }, [minimumPledge, isFetchingPledges, artwork.isBidded]);
 
   // --- FETCH PLEDGES FROM SUPABASE ---
   useEffect(() => {
@@ -295,6 +296,17 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
         @keyframes spin { to { transform: rotate(360deg); } }
         .zoom-modal { position: fixed; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.9); display: flex; align-items: center; justify-content: center; cursor: zoom-out; }
         .zoom-modal img { max-width: 90%; max-height: 90%; object-fit: contain; }
+        
+        .bidding-closed-message { 
+          padding: 1.5rem; 
+          background-color: #FEF2F2; 
+          border: 1px solid #FECACA; 
+          border-radius: 8px; 
+          text-align: center; 
+          color: #B91C1C; 
+          font-weight: 600; 
+          margin: 1rem 0;
+        }
       `}</style>
 
       {imageZoom && (
@@ -358,145 +370,161 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
               <div className="detail-row">
                 <span className="detail-label">Next Minimum Pledge</span>
                 <span className="detail-value">
-                  ₹{minimumPledge.toLocaleString()}{" "}
-                  {/* Display the dynamic minimumPledge */}
+                  {artwork.isBidded
+                    ? "N/A"
+                    : `₹${minimumPledge.toLocaleString()}`}
                 </span>
               </div>
-              <div className="met-status">Accepted minimum price is met</div>
+              <div className="met-status">
+                {artwork.isBidded
+                  ? "Artwork Promised"
+                  : "Accepted minimum price is met"}
+              </div>
             </div>
 
-            <form
-              onSubmit={handleSubmit}
-              className="pledge-form-section"
-              noValidate
-            >
-              <div className="pledge-increments">
-                {pledgeIncrements.map((amount) => (
+            {/* Show bidding closed message if artwork is bidded */}
+            {artwork.isBidded && (
+              <div className="bidding-closed-message">
+                Bidding has been closed for this artwork. This piece has been
+                promised to a bidder.
+              </div>
+            )}
+
+            {/* Only show form if artwork is not bidded */}
+            {!artwork.isBidded && (
+              <form
+                onSubmit={handleSubmit}
+                className="pledge-form-section"
+                noValidate
+              >
+                <div className="pledge-increments">
+                  {pledgeIncrements.map((amount) => (
+                    <button
+                      type="button"
+                      key={amount}
+                      className={`pledge-increment-btn ${
+                        formData.pledgeAmount === amount.toString()
+                          ? "active"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          pledgeAmount: amount.toString(),
+                        }))
+                      }
+                    >
+                      ₹{amount.toLocaleString()}
+                    </button>
+                  ))}
+                </div>
+                <div className="form-inputs-grid">
+                  <div className="form-field">
+                    <label htmlFor="name" className="form-label">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      placeholder="John Doe"
+                    />
+                    <div className="error-text">{errors.name}</div>
+                  </div>
+                  <div className="form-field">
+                    <label htmlFor="email" className="form-label">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      placeholder="john.doe@example.com"
+                    />
+                    <div className="error-text">{errors.email}</div>
+                  </div>
+                  <div className="form-field">
+                    <label htmlFor="phone" className="form-label">
+                      Phone
+                    </label>
+                    <div className="form-input-wrapper">
+                      <span className="form-input-prefix">+91</span>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="form-input"
+                        placeholder="9876543210"
+                        inputMode="numeric"
+                        pattern="[0-9]{10}"
+                      />
+                    </div>
+                    <div className="error-text">{errors.phone}</div>
+                  </div>
+                  <div className="form-field">
+                    <label htmlFor="pledgeAmount" className="form-label">
+                      Your Pledge
+                    </label>
+                    <input
+                      type="number"
+                      id="pledgeAmount"
+                      name="pledgeAmount"
+                      value={formData.pledgeAmount}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      min={minimumPledge}
+                    />
+                    <div className="error-text">{errors.pledgeAmount}</div>
+                  </div>
+                </div>
+                <div className="action-buttons">
+                  <button
+                    type="submit"
+                    className="place-pledge-btn"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Pledging..." : "Place pledge"}
+                  </button>
                   <button
                     type="button"
-                    key={amount}
-                    className={`pledge-increment-btn ${
-                      formData.pledgeAmount === amount.toString()
-                        ? "active"
-                        : ""
-                    }`}
+                    className="set-max-pledge-btn"
+                    disabled={isSubmitting}
                     onClick={() =>
                       setFormData((prev) => ({
                         ...prev,
-                        pledgeAmount: amount.toString(),
+                        pledgeAmount: minimumPledge.toString(),
                       }))
                     }
                   >
-                    ₹{amount.toLocaleString()}
+                    Set to Minimum
                   </button>
-                ))}
-              </div>
-              <div className="form-inputs-grid">
-                <div className="form-field">
-                  <label htmlFor="name" className="form-label">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="form-input"
-                    placeholder="John Doe"
-                  />
-                  <div className="error-text">{errors.name}</div>
                 </div>
-                <div className="form-field">
-                  <label htmlFor="email" className="form-label">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="form-input"
-                    placeholder="john.doe@example.com"
-                  />
-                  <div className="error-text">{errors.email}</div>
-                </div>
-                <div className="form-field">
-                  <label htmlFor="phone" className="form-label">
-                    Phone
-                  </label>
-                  <div className="form-input-wrapper">
-                    <span className="form-input-prefix">+91</span>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="form-input"
-                      placeholder="9876543210"
-                      inputMode="numeric"
-                      pattern="[0-9]{10}"
-                    />
-                  </div>
-                  <div className="error-text">{errors.phone}</div>
-                </div>
-                <div className="form-field">
-                  <label htmlFor="pledgeAmount" className="form-label">
-                    Your Pledge
-                  </label>
-                  <input
-                    type="number"
-                    id="pledgeAmount"
-                    name="pledgeAmount"
-                    value={formData.pledgeAmount}
-                    onChange={handleInputChange}
-                    className="form-input"
-                    min={minimumPledge} // Use the dynamic minimumPledge
-                  />
-                  <div className="error-text">{errors.pledgeAmount}</div>
-                </div>
-              </div>
-              <div className="action-buttons">
-                <button
-                  type="submit"
-                  className="place-pledge-btn"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Pledging..." : "Place pledge"}
-                </button>
-                <button
-                  type="button" // Changed to button to prevent form submission
-                  className="set-max-pledge-btn"
-                  disabled={isSubmitting}
-                  onClick={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      pledgeAmount: minimumPledge.toString(),
-                    }))
-                  }
-                >
-                  Set to Minimum {/* Renamed the button */}
-                </button>
-              </div>
-              {submitSuccess && (
-                <p
-                  style={{
-                    color: "#004276",
-                    textAlign: "center",
-                    fontWeight: "600",
-                    padding: "10px",
-                    backgroundColor: "#e6f4ea",
-                    borderRadius: "4px",
-                    border: "1px solid #004276",
-                    marginTop: "10px",
-                  }}
-                >
-                  Thank you for your pledge!
-                </p>
-              )}
-            </form>
+                {submitSuccess && (
+                  <p
+                    style={{
+                      color: "#004276",
+                      textAlign: "center",
+                      fontWeight: "600",
+                      padding: "10px",
+                      backgroundColor: "#e6f4ea",
+                      borderRadius: "4px",
+                      border: "1px solid #004276",
+                      marginTop: "10px",
+                    }}
+                  >
+                    Thank you for your pledge!
+                  </p>
+                )}
+              </form>
+            )}
 
             <div className="pledge-history">
               <div className="history-header">
@@ -541,10 +569,9 @@ const ArtworkDetailClient = ({ artwork }: { artwork: Artwork }) => {
 export default function ArtworkDetailPageWrapper({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const resolvedParams = React.use(params);
-  const { id: artworkId } = resolvedParams;
+  const { id: artworkId } = params;
 
   const foundArtworkJSON = artworkData.find((art) => art.id === artworkId);
 
@@ -552,7 +579,7 @@ export default function ArtworkDetailPageWrapper({
     return <div>Artwork not found</div>;
   }
 
-  // Map JSON data to the Artwork interface (topBid is no longer used here)
+  // Map JSON data to the Artwork interface
   const artwork: Artwork = {
     id: foundArtworkJSON.id,
     lotNumber: foundArtworkJSON.lotNumber,
@@ -564,7 +591,7 @@ export default function ArtworkDetailPageWrapper({
     minimumIncrement: foundArtworkJSON.minimumIncrement,
     page: foundArtworkJSON.page,
     image: foundArtworkJSON.image,
-    // topBid is removed from the Artwork interface and mapping
+    isBidded: foundArtworkJSON.isBidded, // Include the new field
   };
 
   return <ArtworkDetailClient artwork={artwork} />;
