@@ -49,7 +49,7 @@
       "minimumIncrement": 10000,
       "page": 6,
       "image": "/images/3.jpeg",
-      "isBidded": false
+      "isBidded": true
     },
     {
       "id": "04",
@@ -83,7 +83,7 @@
       "minimumIncrement": 25000,
       "page": 8,
       "image": "/images/5.jpeg",
-      "isBidded": false
+      "isBidded": true
     },
     {
       "id": "06",
@@ -100,7 +100,7 @@
       "minimumIncrement": 25000,
       "page": 9,
       "image": "/images/6.jpeg",
-      "isBidded": false
+      "isBidded": true
     },
     {
       "id": "07",
@@ -117,7 +117,7 @@
       "minimumIncrement": 50000,
       "page": 10,
       "image": "/images/7.jpeg",
-      "isBidded": false
+      "isBidded": true
     },
     {
       "id": "08",
@@ -183,7 +183,7 @@
       "minimumIncrement": 25000,
       "page": 14,
       "image": "/images/11.jpeg",
-      "isBidded": false
+      "isBidded": true
     },
     {
       "id": "12",
@@ -302,7 +302,7 @@
       "minimumIncrement": 20000,
       "page": 21,
       "image": "/images/18.jpeg",
-      "isBidded": false
+      "isBidded": true
     },
     {
       "id": "19",
@@ -336,7 +336,7 @@
       "minimumIncrement": 25000,
       "page": 23,
       "image": "/images/20.jpeg",
-      "isBidded": false
+      "isBidded": true
     },
     {
       "id": "21",
@@ -353,7 +353,7 @@
       "minimumIncrement": 20000,
       "page": 24,
       "image": "/images/21.jpeg",
-      "isBidded": false
+      "isBidded": true
     },
     {
       "id": "22",
