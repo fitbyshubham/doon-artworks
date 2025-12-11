@@ -117,7 +117,7 @@
       "minimumIncrement": 50000,
       "page": 10,
       "image": "/images/7.jpeg",
-      "isBidded": true
+      "isBidded": false
     },
     {
       "id": "08",
@@ -168,7 +168,7 @@
       "minimumIncrement": 10000,
       "page": 13,
       "image": "/images/10.jpeg",
-      "isBidded": false
+      "isBidded": true
     },
     {
       "id": "11",
